@@ -1,0 +1,8 @@
+## Local Configuration Template for MHS Player
+#
+# Copy this file to 'local.properties' and adjust the SDK path below to match your machine setup.
+# Do NOT check your customized 'local.properties' into version control.
+
+# Location of the Android SDK (adjust for Windows, macOS, or Linux)
+# On Windows, escape backslashes: C\:\\Users\\YourUsername\\AppData\\Local\\Android\\Sdk
+sdk.dir=C\:\\Users\\YOUR_USERNAME\\AppData\\Local\\Android\\Sdk

@@ -1,0 +1,64 @@
+# MHS Player — Professional GitIgnore Config
+
+# Build and Cache Artifacts
+.gradle/
+.idea/
+.kotlin/
+build/
+**/build/
+bin/
+gen/
+out/
+captures/
+.externalNativeBuild
+.cxx
+cmake-build-debug/
+
+# Local Configurations & Secrets
+local.properties
+local.properties.private
+*.jks
+*.keystore
+*.p12
+*.pem
+*.der
+google-services.json
+
+# Local Release Outputs & Packages
+**/release/
+*.apk
+*.apks
+*.aab
+
+# Archive Files & Backups (Prevent large binaries)
+*.rar
+*.7z
+*.zip
+*.tar
+*.gz
+
+# OS and IDE Junk
+.DS_Store
+Thumbs.db
+*.swp
+*~
+*.iml
+*.iws
+*.ipr
+.idea/shelf/
+.idea/workspace.xml
+.idea/caches/
+.idea/vcs.xml
+.idea/gradle.xml
+.idea/libraries/
+.idea/modules.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+.idea/deploymentTargetDropDown.xml
+.idea/inspectionProfiles/
+*.log
+
+# Temp Folders
+temp/
+tmp/
+docs/temp/

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MHS Player</string>
+    <string name="home">Home</string>
+    <string name="video">Video</string>
+    <string name="audio">Audio</string>
+    <string name="folders">Folders</string>
+    <string name="history">History</string>
+    <string name="favorites">Favorites</string>
+    <string name="settings">Settings</string>
+    <string name="no_media_found">No media found</string>
+    <string name="grant_permission">Grant Permission</string>
+    <string name="storage_permission_required">Storage permission required to browse media files.</string>
+    <string name="press_back_to_exit">Press back again to exit</string>
+    <string name="continue_watching">Continue Watching</string>
+    <string name="recently_added">Recently Added</string>
+    <string name="now_playing">Now Playing</string>
+    <string name="queue">Queue</string>
+    <string name="playback_speed">Playback Speed</string>
+    <string name="resize_mode">Resize Mode</string>
+    <string name="subtitles">Subtitles</string>
+    <string name="audio_tracks">Audio Tracks</string>
+    <string name="lock_controls">Lock Controls</string>
+    <string name="unlock_controls">Unlock Controls</string>
+    <string name="premium_experience">Premium Media Experience</string>
+    <string name="search_media">Search media…</string>
+    <string name="exit_app_title">Exit MHS Player?</string>
+    <string name="exit_app_message">Are you sure you want to exit?</string>
+    <string name="exit">Exit</string>
+    <string name="cancel">Cancel</string>
+    <string name="continue_watching_label">Continue Watching</string>
+    <string name="recent_videos">Recent Videos</string>
+    <string name="recent_audio">Recent Audio</string>
+    <string name="see_all">See all</string>
+    <string name="storage_permission_needed">Storage permission needed</string>
+    <string name="grant_permission_browse">Grant permission to browse your media</string>
+</resources>

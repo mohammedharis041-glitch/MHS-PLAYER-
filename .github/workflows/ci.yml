@@ -1,0 +1,29 @@
+name: MHS Player CI
+
+on:
+  push:
+    branches: [ main, master, dev, 'release/**' ]
+  pull_request:
+    branches: [ main, master, dev ]
+
+jobs:
+  build:
+    name: Compile & Lint Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Grant Execute Permission to Gradlew
+        run: chmod +x gradlew
+
+      - name: Run Quality Verification & Build
+        run: ./gradlew compileDebugSources lintDebug assembleDebug --no-daemon

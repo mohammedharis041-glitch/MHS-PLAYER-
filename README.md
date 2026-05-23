@@ -1,137 +1,139 @@
-# MHS PLAYER 🎬🔥
+# MHS PLAYER 📽️
 
-A modern Android media player focused on smooth playback, premium UI, subtitle features, Android TV support, and future-ready codec compatibility.
+![MHS Player Banner](docs/screenshots/banner.png)
 
-MHS PLAYER is built using modern Android technologies with the goal of combining:
-
-* MX Player style smooth UX
-* VLC-like playback compatibility
-* Modern Android & TV experience
+MHS PLAYER is a high-performance, premium open-source media player for Android built entirely with **Jetpack Compose** and **Media3 (ExoPlayer)**. It is meticulously designed with a modern glassmorphic Material 3 interface, advanced offline machine-learning-based translation pipelines, and customized local native decoders.
 
 ---
 
-# ✨ Features
+## 💎 Features
 
-## 🎥 Playback
+### 🚀 Performance & Native Decoding
+- **Local FFmpeg Decoding Engine**: Integrated custom-compiled release AAR of `lib-decoder-ffmpeg` supporting advanced audio formats (EAC3, Dolby Digital Plus, DTS, TrueHD) out-of-the-box.
+- **Android 15 Compatibility (16KB Page Size)**: Native library compiled with 16KB page-alignment and `extractNativeLibs="true"` to run flawlessly on next-generation Android architectures.
+- **HW Acceleration**: Full support for hardware-accelerated H.264, HEVC, and VP9 video decoding.
 
-* Smooth video playback
-* Audio playback support
-* Fullscreen controls
-* Playback resume support
-* Continue watching section
-* Gesture controls
-* Playback history
+### 🎨 Modern & Responsive UX
+- **Dynamic Glassmorphic Layouts**: Premium frosted-glass Material 3 sheets and overlay controls that adapt beautifully to high refresh rate (90Hz / 120Hz) displays.
+- **Fluid Gesture Control System**:
+  - *Vertical Swipe*: Control brightness (left screen half) and stream volume (right screen half) via sleek custom vertical HUD indicators.
+  - *Horizontal Seek Scroll*: Scroll across screen space to preview seek offsets.
+  - *Long-Press Accelerate*: Hold down on the right side of the screen to activate instant `2.0x` speed playback.
+  - *Double-Tap to Jump*: Double-tap on screen margins to perform incremental forward/backward seeking.
+- **Picture-in-Picture (PiP)**: Standard PiP mode support with auto-aspect ratio adaptation.
 
-## 🔍 Media Library
-
-* Folder browsing
-* Search functionality
-* Sorting & filtering
-* Favorites support
-* Hidden/private folder support
-* Fast media scanning
-
-## 📝 Subtitle Features
-
-* Subtitle support
-* Subtitle manager
-* Subtitle customization
-* Subtitle sync controls
-* Online subtitle architecture
-* Multi-language subtitle support
-
-## ⚡ Premium Features
-
-* Real-time seek preview system
-* HW acceleration support
-* Modern seek controls
-* Preview popup architecture
-* Audio effects support
-
-## 📺 Android TV Ready
-
-* TV-friendly architecture
-* Remote navigation support
-* Leanback-style future plans
-* Large-screen optimized layouts
-
-## 🎨 Modern UI
-
-* Jetpack Compose UI
-* Material 3 design
-* Smooth animations
-* Modern dark theme
-* Glassmorphism-inspired visuals
+### 💬 Premium Subtitle & Translation Engine
+- **Multi-Format Subtitle Parser**: High-performance local `.srt` and `.ass` parser.
+- **Dual AI & Cloud Translation**:
+  - *Gemini AI Translation*: Integration of generative translation models for cinema-grade local subtitle translation.
+  - *Cloud Fallback API Chain*: Offline-friendly translation fallback using high-performance Lingva and Google translate APIs.
+- **Interactive Search & Downloader**: Integrated OpenSubtitles and Malayalam Subtitles (MSone) providers to search, download, and instantly inject subtitles into active playback streams.
 
 ---
 
-# 🚀 Planned Features
+## 🛠️ Architecture & Package Structure
 
-* Online subtitle search & auto-download
-* AI subtitle translation
-* Advanced codec compatibility
-* FFmpeg/custom codec support
-* HW/SW decoder selector
-* Android TV optimized UI
-* Better 4K playback support
-* Real-time thumbnail previews
-* Cloud sync features
-* Playlist & media organization improvements
+The project conforms to clean architectural guidelines with structured separation of concerns:
 
----
-
-# 🛠 Tech Stack
-
-* Kotlin
-* Android Studio
-* Jetpack Compose
-* Media3 / ExoPlayer
-* Material Design 3
-* Room Database
-* Hilt Dependency Injection
-
----
-
-# 💡 Vision
-
-MHS PLAYER aims to become a premium open-source Android media player with:
-
-* Smooth performance
-* Modern UI/UX
-* Better subtitle handling
-* Strong playback compatibility
-* Android TV optimization
-* Lightweight architecture
-
----
-
-# 📦 Status
-
-⚠️ Project is currently under active development.
-
-Features, UI, and architecture may change frequently as the project evolves.
-
----
-
-# ❤️ Contributions & Feedback
-
-Suggestions, feature requests, testing, and feedback are always welcome.
-
-If you like the project:
-⭐ Star the repository
-🐛 Report issues
-💡 Suggest features
-🚀 Share feedback
+```
+com.mhs.player
+│
+├── database/                    # Room DB schemas for favorites and history
+├── di/                          # Dependency injection modules (Hilt)
+├── media/                       # Media metadata indexing & folder hierarchy scanning
+│   ├── detection/
+│   ├── filesystem/              # Scoped storage resolvers and scanners
+│   ├── folders/
+│   └── sorting/
+│
+├── navigation/                  # Jetpack Compose Navigation Graph
+│
+├── player/                      # Core player systems
+│   ├── audio/                   # Equalizer and audio effects managers
+│   │
+│   ├── controller/              # Playback controller and queue systems
+│   │   ├── PlayerController.kt  # Media3 ExoPlayer wrapper and unified state management
+│   │   └── PlaybackManager.kt   # History tracking & playback session recovery
+│   │
+│   ├── gestures/                # Sleek gesture controller & overlay components
+│   │   ├── GestureController.kt # Volume, brightness and seek handlers
+│   │   └── GestureOverlay.kt    # Composable gesture surface
+│   │
+│   ├── service/                 # Media3 Background Playback Service
+│   │
+│   ├── subtitles/               # Subtitle structures, downloaders, and providers
+│   │   ├── providers/           # MSone, OpenSubtitles, and SubtitleCat plugins
+│   │   └── SrtParser.kt         # Custom high-performance .srt parser
+│   │
+│   ├── translation/             # Cinema-grade translation engine
+│   │   └── SubtitleTranslator.kt# Gemini and cloud translation chain
+│   │
+│   ├── ui/                      # Frosted sheets, controllers, and custom controls
+│   │
+│   └── utils/                   # Clean formatting and tag-stripping utilities
+│
+├── ui/                          # Screen layouts and theme specifications
+└── settings/                    # DataStore preferences repository
+```
 
 ---
 
-# 📥 Download
+## 🚀 Getting Started
 
-APK releases are available in the Releases section.
+### Prerequisites
+- **Android Studio Koala** (2024.1.1) or newer.
+- **Android SDK 35** (Compile SDK).
+- **Java 17** (Ensure `JAVA_HOME` is pointed to a valid JDK 17 or Android Studio's bundled JBR).
+
+### Local Setup & Compilation
+
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/yourusername/mhs-player.git
+   cd mhs-player
+   ```
+
+2. **Configure Local Environment**:
+   Duplicate the provided configuration template at the root directory:
+   ```bash
+   cp local.properties.example local.properties
+   ```
+   Open `local.properties` and verify your local Android SDK location:
+   ```properties
+   sdk.dir=C:/Users/YourUsername/AppData/Local/Android/Sdk
+   ```
+
+3. **Compile Debug Build**:
+   To compile the debug version of the application:
+   - On Windows (PowerShell):
+     ```powershell
+     $env:JAVA_HOME="C:\Program Files\Android\Android Studio\jbr"
+     ./gradlew assembleDebug
+     ```
+   - On macOS / Linux:
+     ```bash
+     export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+     ./gradlew assembleDebug
+     ```
 
 ---
 
-# 📜 License
+## 🤝 Contributing
 
-This project is currently under development.
-License details may be updated in future releases.
+Contributions are welcomed! If you find any issues or have feature recommendations:
+1. Fork the project.
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`).
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
+4. Push to the branch (`git push origin feature/AmazingFeature`).
+5. Open a Pull Request.
+
+---
+
+## 📜 License & Credits
+
+Distributed under the **MIT License**. See `LICENSE` for details.
+
+### Acknowledgements
+- **AndroidX Media3 (ExoPlayer)** for the robust core playback interface.
+- **FFmpeg Project** for the universal decoding engine.
+- Built with ❤️ by the **MHS Team**.
