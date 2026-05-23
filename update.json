@@ -1,6 +1,6 @@
 {
-  "versionCode": 8,
-  "versionName": "1.0.7",
+  "versionCode": 9,
+  "versionName": "1.0.8",
   "apkUrl": "https://github.com/mohammedharis041-glitch/MHS-PLAYER-/releases/download/v1.0.7/app-universal-release.apk",
   "mandatory": false,
   "changelog": "• Smart Enhance\n• Better subtitle transparency\n• OTA updater fixes"
