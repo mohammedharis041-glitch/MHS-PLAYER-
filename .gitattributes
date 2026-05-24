@@ -1,0 +1,4 @@
+# Enforce LF line endings for gradlew to prevent GHA "bad interpreter" errors on Ubuntu runners
+gradlew text eol=lf
+*.sh text eol=lf
+*.bat text eol=crlf
