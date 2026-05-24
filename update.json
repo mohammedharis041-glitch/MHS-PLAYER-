@@ -1,7 +1,7 @@
 {
   "versionCode": 10,
   "versionName": "1.0.9",
-  "apkUrl": "https://github.com/mohammedharis041-glitch/MHS-PLAYER-/releases/download/MHSplayer/app-release.1.apk",
+  "apkUrl": "https://github.com/mohammedharis041-glitch/MHS-PLAYER-/raw/main/app-universal-release.apk",
   "apkSize": 17265665,
   "mandatory": false,
   "changelog": "• Smart Enhance presets\n• Enhanced subtitle transparency\n• Secure storage OTA updater",
