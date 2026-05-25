@@ -1,7 +1,7 @@
 {
   "versionCode": 13,
   "versionName": "1.1.2",
-  "apkUrl": "https://github.com/mohammedharis041-glitch/MHS-PLAYER-/raw/main/app-universal-release.apk",
+  "apkUrl": "https://github.com/mohammedharis041-glitch/MHS-PLAYER-/releases/download/v1.1.2/app-universal-release.apk",
   "apkSize": 17225594,
   "mandatory": false,
   "changelog": "• Fix OTA update polling and progress display bug\n• Smart Enhance presets\n• Enhanced subtitle transparency",
