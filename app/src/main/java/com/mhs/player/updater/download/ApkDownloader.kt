@@ -53,6 +53,7 @@ class ApkDownloader @Inject constructor(
         val request = DownloadManager.Request(Uri.parse(url)).apply {
             setTitle("MHS Player Update")
             setDescription("Downloading latest update")
+            setMimeType("application/vnd.android.package-archive")
             setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
             setDestinationInExternalFilesDir(context, null, fileName)
             addRequestHeader("User-Agent", "MHSPlayer-Updater")
