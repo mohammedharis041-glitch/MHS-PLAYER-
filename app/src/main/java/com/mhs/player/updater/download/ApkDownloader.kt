@@ -133,7 +133,13 @@ class ApkDownloader @Inject constructor(
 
         when (status) {
             DownloadManager.STATUS_PENDING -> {
-                return DownloadState.Idle
+                return DownloadState.Downloading(
+                    progress = 0f,
+                    bytesDownloaded = 0L,
+                    totalBytes = 0L,
+                    speedBps = 0L,
+                    etaSeconds = 0L
+                )
             }
             DownloadManager.STATUS_PAUSED -> {
                 return DownloadState.Paused

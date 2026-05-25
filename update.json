@@ -1,9 +1,9 @@
 {
-  "versionCode": 10,
-  "versionName": "1.0.9",
+  "versionCode": 11,
+  "versionName": "1.1.0",
   "apkUrl": "https://github.com/mohammedharis041-glitch/MHS-PLAYER-/raw/main/app-universal-release.apk",
   "apkSize": 17225594,
   "mandatory": false,
-  "changelog": "• Smart Enhance presets\n• Enhanced subtitle transparency\n• Secure storage OTA updater",
-  "publishedAt": "2026-05-24T00:00:00Z"
+  "changelog": "• Fix OTA update polling and progress display bug\n• Smart Enhance presets\n• Enhanced subtitle transparency",
+  "publishedAt": "2026-05-25T00:00:00Z"
 }
