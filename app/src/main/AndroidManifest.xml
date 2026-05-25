@@ -113,6 +113,14 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <receiver
+            android:name=".updater.install.SplitInstallReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.mhs.player.updater.INSTALL_STATUS" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>
