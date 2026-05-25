@@ -14,8 +14,8 @@ android {
         applicationId = "com.mhs.player"
         minSdk = 26
         targetSdk = 36
-        versionCode = 12
-        versionName = "1.1.1"
+        versionCode = 13
+        versionName = "1.1.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Optimize resources: only keep relevant languages
