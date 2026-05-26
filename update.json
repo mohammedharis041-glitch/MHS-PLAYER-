@@ -1,9 +1,9 @@
 {
-  "versionCode": 14,
-  "versionName": "1.1.3",
-  "apkUrl": "https://github.com/mohammedharis041-glitch/MHS-PLAYER-/releases/download/v1.1.3/app-release.apk",
-  "apkSize": 17235000,
+  "versionCode": 15,
+  "versionName": "1.1.4",
+  "apkUrl": "https://github.com/mohammedharis041-glitch/MHS-PLAYER-/releases/download/v1.1.4/app-universal-release.apk",
+  "apkSize": 17245000,
   "mandatory": false,
-  "changelog": "• Fix volume/brightness overlay start/end transition flash glitch\n• Boost volume/brightness swipe sensitivity & tracking responsiveness\n• Accelerate physical volume button adjustments (2 steps per keypress)\n• Fix double subtitle rendering (ghosting) and translation overlay track conflicts",
-  "publishedAt": "2026-05-26T12:00:00Z"
+  "changelog": "• Add robust 1080p / 10-bit HEVC (x265 / Main10) hardware-to-software auto fallback\n• Ensure seamless playback position and queue recovery during fallback\n• Add manual Hardware (HW) / Software (SW) decoder toggles to controls panel\n• Add real-time Codec Profile and bit-depth telemetry in diagnostics overlays\n• Integrate Playback Diagnostics overlay container inside External Player Screen",
+  "publishedAt": "2026-05-26T17:39:00Z"
 }
