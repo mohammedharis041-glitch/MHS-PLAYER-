@@ -26,4 +26,4 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run Quality Verification & Build
-        run: ./gradlew compileDebugSources lintDebug assembleDebug --no-daemon
+        run: ./gradlew compileDebugSources lintDebug assembleDebug --no-daemon --stacktrace
