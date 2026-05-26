@@ -25,9 +25,10 @@ class UpdateRepository @Inject constructor(
      */
     suspend fun getLatestUpdate(channel: String = "stable"): UpdateManifest? = withContext(Dispatchers.IO) {
         try {
-            Log.d(TAG, "Fetching update manifest from URL: $MANIFEST_URL")
+            val cacheBusterUrl = "$MANIFEST_URL?t=${System.currentTimeMillis()}"
+            Log.d(TAG, "Fetching update manifest from URL: $cacheBusterUrl")
 
-            val response = gitHubApi.getUpdateManifest(MANIFEST_URL)
+            val response = gitHubApi.getUpdateManifest(cacheBusterUrl)
             val finalUrl = response.raw().request.url
             Log.d(TAG, "Final API URL: $finalUrl")
             Log.d(TAG, "Response Code: HTTP ${response.code()}")
