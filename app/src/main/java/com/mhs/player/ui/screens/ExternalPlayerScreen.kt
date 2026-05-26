@@ -9,7 +9,7 @@ import android.view.WindowManager
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
@@ -452,6 +452,39 @@ fun ExternalPlayerScreen(
                     viewModel.showSubtitleSearch(false)
                 },
                 onDismiss = { viewModel.showSubtitleSearch(false) }
+            )
+        }
+
+        // Premium Animated Audio Settings Sheet
+        AnimatedVisibility(
+            visible = uiState.showAudioSettings,
+            enter = slideInVertically(
+                initialOffsetY = { it },
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioLowBouncy,
+                    stiffness = Spring.StiffnessMediumLow
+                )
+            ) + fadeIn(tween(300)),
+            exit = slideOutVertically(
+                targetOffsetY = { it },
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioNoBouncy,
+                    stiffness = Spring.StiffnessMediumLow
+                )
+            ) + fadeOut(tween(300))
+        ) {
+            var audioTracks by remember { mutableStateOf(emptyList<PlayerController.TrackInfo>()) }
+            LaunchedEffect(uiState.showAudioSettings) {
+                if (uiState.showAudioSettings) {
+                    audioTracks = viewModel.getAudioTracks()
+                }
+            }
+            com.mhs.player.player.controls.AudioSettingsSheet(
+                currentTracks = audioTracks,
+                audioDelayMs = uiState.audioDelayMs,
+                onSelectTrack = { viewModel.selectAudioTrack(it); audioTracks = viewModel.getAudioTracks() },
+                onUpdateDelay = viewModel::updateAudioDelay,
+                onDismiss = { viewModel.showAudioSettings(false) }
             )
         }
     }
