@@ -835,9 +835,14 @@ class PlayerViewModel @Inject constructor(
     }
 
     fun toggleDecoder() {
-        // Compatibility mode is temporarily parked. 
-        // We now focus on Media3 + FFmpeg audio compatibility.
-        showDecoderMessage("HW Decoder (Optimized)")
+        val current = playerController.getUseSoftwareVideoDecoder()
+        val target = !current
+        playerController.setUseSoftwareVideoDecoder(target)
+        if (target) {
+            showDecoderMessage("SW Decoder (Safe Fallback)")
+        } else {
+            showDecoderMessage("HW Decoder (Optimized)")
+        }
     }
 
     private fun showDecoderMessage(msg: String) {

@@ -32,6 +32,11 @@ import com.mhs.player.player.controls.CustomPlayerControls
 import com.mhs.player.player.controls.GestureOverlay
 import com.mhs.player.player.controller.PlayerController
 import com.mhs.player.settings.SettingsRepository.OrientationMode
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import com.mhs.player.ui.theme.*
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 
 @Composable
 fun ExternalPlayerScreen(
@@ -48,6 +53,7 @@ fun ExternalPlayerScreen(
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val isFirstFrameRendered by viewModel.playerController.isFirstFrameRendered.collectAsStateWithLifecycle()
     val importState by viewModel.importState.collectAsStateWithLifecycle()
+    val diagnosticsInfo by viewModel.playerController.diagnosticsInfo.collectAsStateWithLifecycle()
     val isPlayerReady = remember(videoSize) { videoSize.width > 0 && videoSize.height > 0 }
     var videoScale by remember { mutableFloatStateOf(1f) }
 
@@ -411,6 +417,66 @@ fun ExternalPlayerScreen(
                 onRotate = viewModel::toggleRotationLock,
                 rotationLabel = if (uiState.isRotationLocked) "Locked" else "Unlock"
             )
+        }
+
+        // --- Playback Diagnostics Overlay HUD ---
+        AnimatedVisibility(
+            visible = uiState.isDiagnosticsEnabled,
+            enter = fadeIn() + slideInHorizontally(initialOffsetX = { it }),
+            exit = fadeOut() + slideOutHorizontally(targetOffsetX = { it }),
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(top = 80.dp, end = 16.dp)
+                .width(280.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .accentGlow(color = AccentCyan, radius = if (diagnosticsInfo.isHeavyVideoMode) 0.dp else 16.dp, offsetY = 0.dp)
+                    .glassCard(cornerRadius = 12.dp, fillAlpha = if (diagnosticsInfo.isHeavyVideoMode) 0.5f else 0.35f, borderAlpha = 0.5f)
+                    .padding(12.dp)
+            ) {
+                Text(
+                    text = "PLAYBACK DIAGNOSTICS",
+                    color = AccentCyan,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Black,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                
+                val items = listOf(
+                    "Decoder" to "${diagnosticsInfo.decoderName} (${if (diagnosticsInfo.isHardware) "HW" else "SW"})",
+                    "Codec / Profile" to "${diagnosticsInfo.codec} (${diagnosticsInfo.codecProfile} | ${diagnosticsInfo.bitDepth})",
+                    "Format" to "${diagnosticsInfo.resolution} @ ${java.lang.String.format(java.util.Locale.US, "%.2f", diagnosticsInfo.bitrate)} Mbps",
+                    "HDR / Color" to diagnosticsInfo.hdrType,
+                    "Dropped Frames" to "${diagnosticsInfo.droppedFrames}",
+                    "Buffering Reason" to diagnosticsInfo.bufferingReason,
+                    "AI Translate" to diagnosticsInfo.subtitleTranslationActivity
+                )
+                
+                items.forEach { (label, value) ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 3.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = label,
+                            color = Color.White.copy(alpha = 0.6f),
+                            style = MaterialTheme.typography.bodySmall,
+                            fontSize = 11.sp
+                        )
+                        Text(
+                            text = value,
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 11.sp
+                        )
+                    }
+                }
+            }
         }
 
         // Subtitle and Audio Settings Sheets

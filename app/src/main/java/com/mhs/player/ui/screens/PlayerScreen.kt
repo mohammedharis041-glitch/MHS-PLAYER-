@@ -386,7 +386,7 @@ fun PlayerScreen(
                 
                 val items = listOf(
                     "Decoder" to "${diagnosticsInfo.decoderName} (${if (diagnosticsInfo.isHardware) "HW" else "SW"})",
-                    "Codec" to "${diagnosticsInfo.codec} (${diagnosticsInfo.bitDepth})",
+                    "Codec / Profile" to "${diagnosticsInfo.codec} (${diagnosticsInfo.codecProfile} | ${diagnosticsInfo.bitDepth})",
                     "Format" to "${diagnosticsInfo.resolution} @ ${java.lang.String.format(java.util.Locale.US, "%.2f", diagnosticsInfo.bitrate)} Mbps",
                     "HDR / Color" to diagnosticsInfo.hdrType,
                     "Dropped Frames" to "${diagnosticsInfo.droppedFrames}",

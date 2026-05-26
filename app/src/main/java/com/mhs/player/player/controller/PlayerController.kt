@@ -14,6 +14,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.SeekParameters
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.exoplayer.trackselection.TrackSelector
+import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
 import com.mhs.player.media.model.MediaItemModel
 import com.mhs.player.media.model.PlaybackState
 import com.mhs.player.player.audio.AudioEffectsManager
@@ -101,6 +102,12 @@ class PlayerController @Inject constructor(
     private var lastCuesText: String? = null
     private var lastCues: List<androidx.media3.common.text.Cue> = emptyList()
     private var translationJob: Job? = null
+
+    // HEVC 10-Bit Playback Compatibility & Software Fallback Pipeline
+    private var bufferingStartTimeMs = 0L
+    private var renderingFrameStartTimeMs = 0L
+    private var fallbackAttempts = 0
+    private var useSoftwareVideoDecoder = false
     private val _autoAdvance = MutableStateFlow(false)
     fun setAutoAdvance(enabled: Boolean) { _autoAdvance.value = enabled }
 
@@ -157,10 +164,32 @@ class PlayerController @Inject constructor(
         Log.d("MHSPlayer", "FFmpeg Extension Available: $isFfmpegAvailable")
         Log.d("MHSPlayer", "Enhanced Mode Active: $isEnhanced")
         
+        // Custom MediaCodecSelector that intercepts decoder queries to force software fallback when needed
+        val customMediaCodecSelector = MediaCodecSelector { mimeType, requiresSecure, requiresTunneling ->
+            val decoders = MediaCodecSelector.DEFAULT.getDecoderInfos(mimeType, requiresSecure, requiresTunneling)
+            Log.d("MHSPlayer-HEVC-Compat", "Querying decoders for mimeType=$mimeType, requiresSecure=$requiresSecure, useSoftwareVideoDecoder=$useSoftwareVideoDecoder")
+            if (useSoftwareVideoDecoder && mimeType.startsWith("video/")) {
+                val softwareDecoders = decoders.filter { info ->
+                    val name = info.name.lowercase()
+                    info.softwareOnly || 
+                    name.contains("google") || 
+                    name.contains("sw") || 
+                    name.contains("software") ||
+                    name.startsWith("c2.android.")
+                }
+                if (softwareDecoders.isNotEmpty()) {
+                    Log.w("MHSPlayer-HEVC-Compat", "FORCE SOFTWARE DECODER fallback enabled! Returning: ${softwareDecoders.map { it.name }}")
+                    return@MediaCodecSelector softwareDecoders
+                }
+            }
+            decoders
+        }
+
         // Prioritize Hardware Decoders (HW+ Mode) globally, fallback to FFmpeg ONLY on failure.
         val renderersFactory = DefaultRenderersFactory(context)
             .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
             .setEnableDecoderFallback(true) // Ensure seamless fallback to software if hardware fails!
+            .setMediaCodecSelector(customMediaCodecSelector)
             
         // Build robust, cinema-grade Buffer LoadControl for high-bitrate / 4K / HDR playback smoothness
         val loadControl = DefaultLoadControl.Builder()
@@ -284,8 +313,10 @@ class PlayerController @Inject constructor(
                 val isHighBitrate = br >= 15f
                 val isHeavy = is4K || isHdr || (isAv1 && isHighBitrate) || (isVp9 && isHighBitrate) || (isHevc && isHighBitrate) || br >= 25f
 
+                val profileName = getProfileString(format)
                 _diagnosticsInfo.value = _diagnosticsInfo.value.copy(
                     codec = codecName,
+                    codecProfile = profileName,
                     bitDepth = is10Bit,
                     hdrType = hdr,
                     resolution = res,
@@ -484,6 +515,11 @@ class PlayerController @Inject constructor(
     private fun playWithMedia3(item: MediaItemModel, position: Long) {
         val exo = _player.value ?: return
         
+        // Reset decoder compatibility state for the new media item
+        useSoftwareVideoDecoder = false
+        bufferingStartTimeMs = 0L
+        renderingFrameStartTimeMs = 0L
+        
         // Restore State
         val params = exo.trackSelectionParameters.buildUpon()
             .setTrackTypeDisabled(C.TRACK_TYPE_AUDIO, false)
@@ -548,6 +584,11 @@ class PlayerController @Inject constructor(
 
     private fun executePlayQueueWithMedia3(items: List<MediaItemModel>, startIndex: Int, startPosition: Long) {
         val exo = _player.value ?: return
+        
+        // Reset decoder compatibility state for the new media item
+        useSoftwareVideoDecoder = false
+        bufferingStartTimeMs = 0L
+        renderingFrameStartTimeMs = 0L
         
         // Restore State
         val params = exo.trackSelectionParameters.buildUpon()
@@ -890,6 +931,35 @@ class PlayerController @Inject constructor(
     override fun onPlayerError(error: PlaybackException) {
         Log.e("MHSPlayer", "onPlayerError encountered: ${error.message}", error)
         
+        // Catch direct MediaCodec decoders initialization or decoding failures
+        var isDecoderException = false
+        var currentCause: Throwable? = error.cause
+        while (currentCause != null) {
+            val name = currentCause.javaClass.name
+            if (name.contains("CodecException", ignoreCase = true) || 
+                name.contains("DecoderInitializationException", ignoreCase = true) || 
+                name.contains("DecoderQueryException", ignoreCase = true) ||
+                name.contains("MediaCodec", ignoreCase = true)
+            ) {
+                isDecoderException = true
+                break
+            }
+            currentCause = currentCause.cause
+        }
+
+        val isDecoderError = error.errorCode == PlaybackException.ERROR_CODE_DECODER_INIT_FAILED ||
+                             error.errorCode == PlaybackException.ERROR_CODE_DECODING_FAILED ||
+                             error.errorCode == PlaybackException.ERROR_CODE_DECODER_QUERY_FAILED ||
+                             isDecoderException ||
+                             error.cause is android.media.MediaCodec.CodecException ||
+                             error.message?.contains("codec", ignoreCase = true) == true ||
+                             error.message?.contains("decoder", ignoreCase = true) == true
+
+        if (isDecoderError && !useSoftwareVideoDecoder) {
+            triggerSoftwareDecoderFallback("Decoder error encountered: ${error.message} (Code: ${error.errorCode})")
+            return
+        }
+
         // Phase 1: Catch any VideoFrameProcessingException or GL rendering exception
         val isShaderError = error.errorCode == PlaybackException.ERROR_CODE_VIDEO_FRAME_PROCESSING_FAILED ||
                 error.cause is VideoFrameProcessingException ||
@@ -966,6 +1036,44 @@ class PlayerController @Inject constructor(
         val realPos = pos.coerceAtLeast(0L)
         // Use -1L as sentinel for 'duration not yet known' so UI can distinguish from truly 0-length media
         val realDur = if (dur == androidx.media3.common.C.TIME_UNSET || dur < 0L) -1L else dur
+
+        // HEVC Main10 / 10-Bit Playback Compatibility & Failure Detection
+        if (loading) {
+            val isHevc = _diagnosticsInfo.value.codec.lowercase().contains("hevc") ||
+                         _diagnosticsInfo.value.codec.lowercase().contains("h265") ||
+                         _player.value?.videoFormat?.sampleMimeType?.contains("hevc", ignoreCase = true) == true
+            
+            if (isHevc && !useSoftwareVideoDecoder) {
+                if (bufferingStartTimeMs == 0L) {
+                    bufferingStartTimeMs = System.currentTimeMillis()
+                } else {
+                    val durationBuffering = System.currentTimeMillis() - bufferingStartTimeMs
+                    if (durationBuffering > 4000L) { // Stuck buffering for > 4 seconds!
+                        bufferingStartTimeMs = 0L
+                        triggerSoftwareDecoderFallback("Stuck in infinite buffering (loading forever)")
+                        return
+                    }
+                }
+            }
+        } else {
+            bufferingStartTimeMs = 0L
+        }
+
+        val isPlayingVideo = isPlaying && (_currentMedia.value?.isVideo == true)
+        if (isPlayingVideo && !_isFirstFrameRendered.value && !useSoftwareVideoDecoder) {
+            if (renderingFrameStartTimeMs == 0L) {
+                renderingFrameStartTimeMs = System.currentTimeMillis()
+            } else {
+                val timeSincePlayingStarted = System.currentTimeMillis() - renderingFrameStartTimeMs
+                if (timeSincePlayingStarted > 4000L) { // Playing but failed to render any frame for > 4s!
+                    renderingFrameStartTimeMs = 0L
+                    triggerSoftwareDecoderFallback("Silent black screen (no video frame rendered)")
+                    return
+                }
+            }
+        } else {
+            renderingFrameStartTimeMs = 0L
+        }
 
         if (current.isPlaying != isPlaying || abs(current.currentPosition - realPos) > 500L || current.duration != realDur || current.isLoading != loading) {
             _playbackState.value = current.copy(
@@ -1157,6 +1265,7 @@ class PlayerController @Inject constructor(
         val decoderName: String = "Unknown",
         val isHardware: Boolean = true,
         val codec: String = "Unknown",
+        val codecProfile: String = "Unknown",
         val bitDepth: String = "8-bit",
         val hdrType: String = "SDR",
         val droppedFrames: Int = 0,
@@ -1167,6 +1276,59 @@ class PlayerController @Inject constructor(
         val smartEnhanceStatus: String = "Disabled",
         val isHeavyVideoMode: Boolean = false
     )
+    private fun triggerSoftwareDecoderFallback(reason: String) {
+        val currentDecoder = _diagnosticsInfo.value.decoderName
+        val currentCodec = _diagnosticsInfo.value.codec
+        val currentProfile = _diagnosticsInfo.value.codecProfile
+        val currentBitDepth = _diagnosticsInfo.value.bitDepth
+        
+        fallbackAttempts++
+        useSoftwareVideoDecoder = true
+        
+        Log.w("MHSPlayer-HEVC-Compat", """
+            ======================================================================
+            === MHS PLAYER DECODER FALLBACK INITIATED ===
+            Hardware Decoder Failure Reason: $reason
+            Codec Profile / Format: $currentCodec ($currentProfile)
+            Bit Depth: $currentBitDepth
+            Previous Decoder Selected: $currentDecoder
+            Fallback Attempt Count: $fallbackAttempts
+            Action: Re-initializing player using Software (Google/c2.android) Decoders.
+            ======================================================================
+        """.trimIndent())
+        
+        val currentPos = getCurrentPosition()
+        scope.launch(Dispatchers.Main) {
+            recreatePlayerAtPosition(currentPos)
+        }
+    }
+
+    private fun recreatePlayerAtPosition(positionMs: Long) {
+        val oldPlayer = _player.value ?: return
+        val currentMediaItem = _currentMedia.value
+        val playlistQueue = queueManager.queue.value
+        val currentIndex = queueManager.currentIndex.value
+        
+        Log.w("MHSPlayer-HEVC-Compat", "Recreating player at position: ${positionMs}ms. useSoftwareVideoDecoder=$useSoftwareVideoDecoder")
+        
+        // 1. Release the old player and clean up listeners
+        oldPlayer.removeListener(this)
+        oldPlayer.release()
+        _player.value = null
+        
+        // 2. Re-initialize the player with new RenderersFactory containing customMediaCodecSelector
+        initPlayer()
+        
+        // 3. Restore queue or media item and resume playback
+        val newPlayer = _player.value ?: return
+        if (playlistQueue.isNotEmpty()) {
+            queueManager.setQueue(playlistQueue, currentIndex)
+            executePlayQueueWithMedia3(playlistQueue, currentIndex, positionMs)
+        } else if (currentMediaItem != null) {
+            playWithMedia3(currentMediaItem, positionMs)
+        }
+    }
+
     private inline fun logVerbose(tag: String, msg: String) {
         if (com.mhs.player.BuildConfig.DEBUG) {
             Log.v(tag, msg)
@@ -1177,5 +1339,61 @@ class PlayerController @Inject constructor(
         if (com.mhs.player.BuildConfig.DEBUG) {
             Log.d(tag, msg)
         }
+    }
+
+    fun getUseSoftwareVideoDecoder(): Boolean = useSoftwareVideoDecoder
+
+    fun setUseSoftwareVideoDecoder(value: Boolean) {
+        if (useSoftwareVideoDecoder != value) {
+            useSoftwareVideoDecoder = value
+            val currentPos = getCurrentPosition()
+            scope.launch(Dispatchers.Main) {
+                recreatePlayerAtPosition(currentPos)
+            }
+        }
+    }
+
+    private fun getProfileString(format: Format): String {
+        val mime = format.sampleMimeType ?: return "Unknown"
+        val codecs = format.codecs ?: return "Unknown"
+        
+        val baseProfile = when {
+            mime.contains("hevc", ignoreCase = true) || mime.contains("h265", ignoreCase = true) -> {
+                when {
+                    codecs.contains(".2.") || codecs.startsWith("hev1.2") || codecs.startsWith("hvc1.2") -> "Main 10"
+                    codecs.contains(".1.") || codecs.startsWith("hev1.1") || codecs.startsWith("hvc1.1") -> "Main"
+                    else -> "HEVC"
+                }
+            }
+            mime.contains("avc", ignoreCase = true) || mime.contains("h264", ignoreCase = true) -> {
+                when {
+                    codecs.contains("avc1.42") -> "Baseline"
+                    codecs.contains("avc1.4d") -> "Main"
+                    codecs.contains("avc1.64") -> "High"
+                    codecs.contains("avc1.6e") -> "High 10"
+                    else -> "AVC"
+                }
+            }
+            mime.contains("vp9", ignoreCase = true) -> {
+                when {
+                    codecs.contains("vp09.00") -> "Profile 0"
+                    codecs.contains("vp09.01") -> "Profile 1"
+                    codecs.contains("vp09.02") -> "Profile 2"
+                    codecs.contains("vp09.03") -> "Profile 3"
+                    else -> "VP9"
+                }
+            }
+            mime.contains("av1", ignoreCase = true) || mime.contains("av01", ignoreCase = true) -> {
+                when {
+                    codecs.startsWith("av01.0") -> "Main"
+                    codecs.startsWith("av01.1") -> "High"
+                    codecs.startsWith("av01.2") -> "Professional"
+                    else -> "AV1"
+                }
+            }
+            else -> "Codec"
+        }
+        
+        return "$baseProfile ($codecs)"
     }
 }
