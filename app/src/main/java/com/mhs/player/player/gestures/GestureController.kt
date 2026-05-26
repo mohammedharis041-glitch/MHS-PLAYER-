@@ -147,16 +147,16 @@ class GestureController @Inject constructor(
 
     fun onVerticalScroll(totalDeltaY: Float, x: Float, screenWidth: Float, screenHeight: Float) {
         if (_gestureState.value.isLocked) return
-        // Scale down the sensitivity slightly for vertical scroll to feel extremely premium, smooth and precise
-        val targetDelta = -(totalDeltaY / screenHeight) * (verticalSensitivity * 0.4f)
+        // Scale up swipe sensitivity and responsiveness to feel extremely premium, fast, and precise
+        val targetDelta = -(totalDeltaY / screenHeight) * (verticalSensitivity * 0.8f)
         
         if (x < screenWidth * 0.25f) {
-            // Smoothly interpolate brightness delta towards the target to eliminate jitter and sudden jumps
-            currentBrightnessDelta = currentBrightnessDelta + 0.25f * (targetDelta - currentBrightnessDelta)
+            // Smoothly interpolate brightness delta with 0.8f factor to remove delay/lag
+            currentBrightnessDelta = currentBrightnessDelta + 0.8f * (targetDelta - currentBrightnessDelta)
             adjustBrightness(currentBrightnessDelta)
         } else if (x > screenWidth * 0.75f) {
-            // Smoothly interpolate volume delta towards the target to eliminate jitter and sudden jumps
-            currentVolumeDelta = currentVolumeDelta + 0.25f * (targetDelta - currentVolumeDelta)
+            // Smoothly interpolate volume delta with 0.8f factor to remove delay/lag
+            currentVolumeDelta = currentVolumeDelta + 0.8f * (targetDelta - currentVolumeDelta)
             adjustVolume(currentVolumeDelta)
         }
         resetAutoHideTimer()
@@ -245,10 +245,12 @@ class GestureController @Inject constructor(
         autoHideJob?.cancel()
         
         val currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+        // Make volume key increments faster by stepping by 2 on standard max=15 stream volumes, or a proportional scale
+        val step = if (maxVolume <= 15) 2 else (maxVolume / 8).coerceAtLeast(2)
         val newVolume = if (isUp) {
-            (currentVolume + 1).coerceAtMost(maxVolume)
+            (currentVolume + step).coerceAtMost(maxVolume)
         } else {
-            (currentVolume - 1).coerceAtLeast(0)
+            (currentVolume - step).coerceAtLeast(0)
         }
         
         // Adjust the volume with 0 flags to completely suppress standard Android volume UI

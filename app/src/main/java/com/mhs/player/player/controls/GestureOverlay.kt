@@ -345,15 +345,28 @@ fun GestureOverlay(
             }
         }
 
+        val activeGesture = gestureState.activeGesture
+        val lastGestureTypeState = remember { mutableStateOf<GestureController.GestureType?>(null) }
+        if (activeGesture == GestureController.GestureType.VOLUME ||
+            activeGesture == GestureController.GestureType.BRIGHTNESS) {
+            lastGestureTypeState.value = activeGesture
+        }
+        val lastGestureType = lastGestureTypeState.value
+
         // ── Premium Centered Floating Circular HUD Gesture Indicators ─────────────────
         AnimatedVisibility(
-            visible = gestureState.activeGesture == GestureController.GestureType.VOLUME ||
-                      gestureState.activeGesture == GestureController.GestureType.BRIGHTNESS,
+            visible = activeGesture == GestureController.GestureType.VOLUME ||
+                      activeGesture == GestureController.GestureType.BRIGHTNESS,
             enter = scaleIn(animationSpec = AppAnimations.TactileSpringSpec) + fadeIn(animationSpec = AppAnimations.CinematicFadeSpec),
             exit = scaleOut(animationSpec = AppAnimations.TactileSpringSpec) + fadeOut(animationSpec = AppAnimations.CinematicFadeSpec),
             modifier = Modifier.align(Alignment.Center)
         ) {
-            val isVolume = gestureState.activeGesture == GestureController.GestureType.VOLUME
+            val currentGestureType = if (activeGesture != GestureController.GestureType.NONE) {
+                activeGesture
+            } else {
+                lastGestureType ?: GestureController.GestureType.VOLUME
+            }
+            val isVolume = currentGestureType == GestureController.GestureType.VOLUME
             val percent = if (isVolume) gestureState.volumePercent else gestureState.brightnessPercent.toFloat()
             val color = if (isVolume) AppColors.CyanGlow else AppColors.AccentAmber
             val icon = if (isVolume) {
@@ -400,7 +413,7 @@ private fun CircularGestureHud(
     val density = LocalDensity.current
     val animatedPercent by animateFloatAsState(
         targetValue = percent.coerceIn(0f, 100f),
-        animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioNoBouncy),
+        animationSpec = spring(stiffness = Spring.StiffnessHigh, dampingRatio = Spring.DampingRatioNoBouncy),
         label = "circular_hud_progress"
     )
 

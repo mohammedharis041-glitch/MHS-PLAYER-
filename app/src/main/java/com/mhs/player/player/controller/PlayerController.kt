@@ -95,6 +95,8 @@ class PlayerController @Inject constructor(
     private val _diagnosticsInfo = MutableStateFlow(DiagnosticsInfo())
     val diagnosticsInfo: StateFlow<DiagnosticsInfo> = _diagnosticsInfo.asStateFlow()
 
+    val isInPipMode = MutableStateFlow(false)
+
     private var lastSubtitleFile: File? = null
     private var lastCuesText: String? = null
     private var lastCues: List<androidx.media3.common.text.Cue> = emptyList()
@@ -861,6 +863,10 @@ class PlayerController @Inject constructor(
 
     override fun onVideoSizeChanged(videoSize: VideoSize) {
         _videoSize.value = videoSize
+        if (videoSize.width > 0 && videoSize.height > 0) {
+            Log.d("MHSPlayer", "Video size initialized (${videoSize.width}x${videoSize.height}). Applying Smart Enhance if enabled.")
+            updateSmartEnhanceEffects(cachedSettings.smartEnhanceEnabled)
+        }
     }
 
     override fun onRenderedFirstFrame() {
@@ -874,20 +880,11 @@ class PlayerController @Inject constructor(
     }
 
     fun updateSmartEnhanceEffects(enabled: Boolean) {
-        val player = _player.value ?: return
-        try {
-            if (enabled) {
-                player.setVideoEffects(listOf(SmartEnhanceGlEffect()))
-                _diagnosticsInfo.value = _diagnosticsInfo.value.copy(smartEnhanceStatus = "Active")
-                Log.d("MHSPlayer", "Smart Enhance video effect applied to player successfully.")
-            } else {
-                player.setVideoEffects(emptyList())
-                _diagnosticsInfo.value = _diagnosticsInfo.value.copy(smartEnhanceStatus = "Disabled")
-                Log.d("MHSPlayer", "Smart Enhance video effects cleared from player.")
-            }
-        } catch (e: Exception) {
-            Log.e("MHSPlayer", "Error updating smart enhance video effects", e)
-        }
+        // Completely disabled / removed the Smart Enhance video effect pipeline as requested by the user.
+        // We do NOT call player.setVideoEffects() AT ALL. This ensures that Media3 remains 100% in
+        // high-performance direct hardware surface rendering mode, avoiding any OpenGL/GL frame-processor paths.
+        _diagnosticsInfo.value = _diagnosticsInfo.value.copy(smartEnhanceStatus = "Disabled")
+        Log.d("MHSPlayer", "Smart Enhance video effects bypassed (Direct Surface Mode Active).")
     }
 
     override fun onPlayerError(error: PlaybackException) {

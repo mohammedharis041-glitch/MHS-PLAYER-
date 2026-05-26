@@ -71,6 +71,7 @@ fun PlayerScreen(
     val player by viewModel.playerController.player.collectAsStateWithLifecycle()
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val isFirstFrameRendered by viewModel.playerController.isFirstFrameRendered.collectAsStateWithLifecycle()
+    val isInPipMode by viewModel.playerController.isInPipMode.collectAsStateWithLifecycle()
 
     val subtitlePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -232,110 +233,83 @@ fun PlayerScreen(
     val diagnosticsInfo by viewModel.playerController.diagnosticsInfo.collectAsStateWithLifecycle()
 
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-        // --- Hybrid Video Surface (Unified Raw SurfaceView) ---
-        BoxWithConstraints(
+        // --- Native Media3 Video Player View (VLC/MX Player Grade Aspect Ratios) ---
+        Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            val containerWidth = constraints.maxWidth.toFloat()
-            val containerHeight = constraints.maxHeight.toFloat()
-            
-            val videoAspectRatio = remember(videoSize, currentMedia) {
-                if (videoSize.width > 0 && videoSize.height > 0) {
-                    val sar = if (videoSize.pixelWidthHeightRatio > 0f) videoSize.pixelWidthHeightRatio else 1f
-                    (videoSize.width.toFloat() * sar) / videoSize.height.toFloat()
-                } else {
-                    val media = currentMedia
-                    if (media != null && media.width > 0 && media.height > 0) {
-                        media.width.toFloat() / media.height.toFloat()
-                    } else {
-                        16f / 9f
+            val playerView = remember(context) {
+                PlayerView(context).apply {
+                    useController = false
+                    // Completely disable built-in subtitle rendering as we handle it custom in SubtitleOverlay
+                    subtitleView?.alpha = 0f
+                    
+                    val aspectMode = when (uiState.currentResizeMode) {
+                        com.mhs.player.media.model.ResizeMode.TRUE_CROP -> AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                        else -> uiState.currentResizeMode.exoMode
                     }
-                }
-            }
-
-            val gpuScale = remember(videoAspectRatio, uiState.currentResizeMode, containerWidth, containerHeight) {
-                val containerAspectRatio = containerWidth / containerHeight
-                var baseScaleX = 1f
-                var baseScaleY = 1f
-                
-                when (uiState.currentResizeMode) {
-                    com.mhs.player.media.model.ResizeMode.FIT -> {
-                        if (containerAspectRatio > videoAspectRatio) {
-                            baseScaleX = videoAspectRatio / containerAspectRatio
-                            baseScaleY = 1f
-                        } else {
-                            baseScaleX = 1f
-                            baseScaleY = containerAspectRatio / videoAspectRatio
+                    resizeMode = aspectMode
+                    
+                    // Bind to the underlying player instance
+                    this.player = player
+                    
+                    // Retrieve the internal SurfaceView dynamically and register it with the controller
+                    post {
+                        fun findSurfaceView(view: android.view.View): SurfaceView? {
+                            if (view is SurfaceView) return view
+                            if (view is android.view.ViewGroup) {
+                                for (i in 0 until view.childCount) {
+                                    val sv = findSurfaceView(view.getChildAt(i))
+                                    if (sv != null) return sv
+                                }
+                            }
+                            return null
                         }
-                    }
-                    com.mhs.player.media.model.ResizeMode.FILL -> {
-                        baseScaleX = 1f
-                        baseScaleY = 1f
-                    }
-                    com.mhs.player.media.model.ResizeMode.ZOOM -> {
-                        if (containerAspectRatio > videoAspectRatio) {
-                            baseScaleX = 1f
-                            baseScaleY = containerAspectRatio / videoAspectRatio
-                        } else {
-                            baseScaleX = videoAspectRatio / containerAspectRatio
-                            baseScaleY = 1f
-                        }
-                    }
-                    com.mhs.player.media.model.ResizeMode.TRUE_CROP -> {
-                        val baseZoomX = if (containerAspectRatio > videoAspectRatio) 1f else (videoAspectRatio / containerAspectRatio)
-                        val baseZoomY = if (containerAspectRatio > videoAspectRatio) (containerAspectRatio / videoAspectRatio) else 1f
-                        baseScaleX = baseZoomX * 1.15f
-                        baseScaleY = baseZoomY * 1.15f
-                    }
-                    else -> {
-                        if (containerAspectRatio > videoAspectRatio) {
-                            baseScaleX = videoAspectRatio / containerAspectRatio
-                            baseScaleY = 1f
-                        } else {
-                            baseScaleX = 1f
-                            baseScaleY = containerAspectRatio / videoAspectRatio
+                        findSurfaceView(this)?.let { surfaceView ->
+                            viewModel.playerController.setVideoSurfaceView(surfaceView)
                         }
                     }
                 }
-                baseScaleX to baseScaleY
             }
 
-            val baseScaleX = gpuScale.first
-            val baseScaleY = gpuScale.second
-
-            // Log size/scale changes for debugging
-            LaunchedEffect(baseScaleX, baseScaleY, uiState.currentResizeMode, videoAspectRatio, videoScale) {
-                android.util.Log.d(
-                    "MHSPlayer-UI",
-                    "GPU Scale Applied: ${baseScaleX}x${baseScaleY} (Mode: ${uiState.currentResizeMode}, AspectRatio: $videoAspectRatio, GestureZoomScale: $videoScale)"
-                )
+            LaunchedEffect(player) {
+                playerView.player = player
             }
 
-            val surfaceView = remember(context) {
-                SurfaceView(context).apply {
-                    if (settings.fasterFullscreen) {
-                        holder.setFormat(android.graphics.PixelFormat.RGBX_8888)
-                    }
-                    viewModel.playerController.setVideoSurfaceView(this)
+            LaunchedEffect(uiState.currentResizeMode) {
+                val aspectMode = when (uiState.currentResizeMode) {
+                    com.mhs.player.media.model.ResizeMode.TRUE_CROP -> AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                    else -> uiState.currentResizeMode.exoMode
                 }
+                playerView.resizeMode = aspectMode
             }
 
-            DisposableEffect(surfaceView) {
+            DisposableEffect(playerView) {
                 onDispose {
-                    android.util.Log.d("MHSPlayer-UI", "PlayerScreen: Disposing surfaceView")
-                    viewModel.playerController.releaseVideoSurfaceView(surfaceView)
+                    fun findSurfaceView(view: android.view.View): SurfaceView? {
+                        if (view is SurfaceView) return view
+                        if (view is android.view.ViewGroup) {
+                            for (i in 0 until view.childCount) {
+                                val sv = findSurfaceView(view.getChildAt(i))
+                                if (sv != null) return sv
+                            }
+                        }
+                        return null
+                    }
+                    findSurfaceView(playerView)?.let { surfaceView ->
+                        viewModel.playerController.releaseVideoSurfaceView(surfaceView)
+                    }
                 }
             }
 
             AndroidView(
-                factory = { surfaceView },
-                update = { /* Pure GPU transformation architecture: surface remains static and layout loops are eliminated */ },
+                factory = { playerView },
+                update = { },
                 modifier = Modifier
                     .fillMaxSize()
                     .graphicsLayer {
-                        scaleX = baseScaleX * videoScale
-                        scaleY = baseScaleY * videoScale
+                        scaleX = videoScale
+                        scaleY = videoScale
                     }
             )
         }
@@ -343,7 +317,7 @@ fun PlayerScreen(
 
         // --- Night Mode / Dim Overlay ---
         AnimatedVisibility(
-            visible = uiState.isDimActive,
+            visible = uiState.isDimActive && !isInPipMode,
             enter = fadeIn(tween(400)),
             exit = fadeOut(tween(400)),
             modifier = Modifier.fillMaxSize()
@@ -387,7 +361,7 @@ fun PlayerScreen(
 
         // --- Playback Diagnostics Overlay HUD ---
         AnimatedVisibility(
-            visible = uiState.isDiagnosticsEnabled,
+            visible = uiState.isDiagnosticsEnabled && !isInPipMode,
             enter = fadeIn() + slideInHorizontally(initialOffsetX = { it }),
             exit = fadeOut() + slideOutHorizontally(targetOffsetX = { it }),
             modifier = Modifier
@@ -446,7 +420,7 @@ fun PlayerScreen(
         }
 
 
-        if (isFirstFrameRendered) {
+        if (isFirstFrameRendered && !isInPipMode) {
             GestureOverlay(
                 viewModel = viewModel,
                 onZoom = { delta ->
@@ -460,7 +434,7 @@ fun PlayerScreen(
 
         // Decoder Switch Message
         AnimatedVisibility(
-            visible = uiState.decoderMessage != null,
+            visible = uiState.decoderMessage != null && !isInPipMode,
             enter = fadeIn(tween(300)) + scaleIn(tween(300, easing = LinearOutSlowInEasing), initialScale = 0.9f),
             exit = fadeOut(tween(500)),
             modifier = Modifier.align(Alignment.Center)
@@ -480,7 +454,7 @@ fun PlayerScreen(
             }
         }
 
-        if (isFirstFrameRendered) {
+        if (isFirstFrameRendered && !isInPipMode) {
             CustomPlayerControls(
                 viewModel = viewModel,
                 currentMedia = currentMedia,
@@ -495,7 +469,7 @@ fun PlayerScreen(
 
         // Sheet Logic (Simplified for clarity)
         AnimatedVisibility(
-            visible = uiState.showSubtitleSettings,
+            visible = uiState.showSubtitleSettings && !isInPipMode,
             enter = slideInVertically(
                 initialOffsetY = { it },
                 animationSpec = spring(
@@ -541,7 +515,7 @@ fun PlayerScreen(
             )
         }
 
-        if (uiState.showSubtitleSearch) {
+        if (uiState.showSubtitleSearch && !isInPipMode) {
             SubtitleSearchSheet(
                 videoFilename = currentMedia?.displayName ?: "Video",
                 videoPath = currentMedia?.path,
@@ -556,7 +530,7 @@ fun PlayerScreen(
         }
 
         AnimatedVisibility(
-            visible = uiState.showAudioSettings,
+            visible = uiState.showAudioSettings && !isInPipMode,
             enter = slideInVertically(
                 initialOffsetY = { it },
                 animationSpec = spring(
@@ -588,7 +562,7 @@ fun PlayerScreen(
         }
 
         ResumePromptOverlay(
-            isVisible = uiState.resumePromptPosition != null,
+            isVisible = uiState.resumePromptPosition != null && !isInPipMode,
             savedPositionMs = uiState.resumePromptPosition ?: 0L,
             onResume = { rem -> uiState.resumePromptPosition?.let { viewModel.resumePlayback(it, rem) } },
             onStartOver = { rem -> viewModel.startFromBeginning(rem) }

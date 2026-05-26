@@ -1,9 +1,9 @@
 {
-  "versionCode": 13,
-  "versionName": "1.1.2",
-  "apkUrl": "https://github.com/mohammedharis041-glitch/MHS-PLAYER-/releases/download/v1.1.2/app-release.apk",
-  "apkSize": 17225594,
+  "versionCode": 14,
+  "versionName": "1.1.3",
+  "apkUrl": "https://github.com/mohammedharis041-glitch/MHS-PLAYER-/releases/download/v1.1.3/app-release.apk",
+  "apkSize": 17235000,
   "mandatory": false,
-  "changelog": "• Fix OTA update polling and progress display bug\n• Smart Enhance presets\n• Enhanced subtitle transparency",
-  "publishedAt": "2026-05-25T00:00:00Z"
+  "changelog": "• Fix volume/brightness overlay start/end transition flash glitch\n• Boost volume/brightness swipe sensitivity & tracking responsiveness\n• Accelerate physical volume button adjustments (2 steps per keypress)\n• Fix double subtitle rendering (ghosting) and translation overlay track conflicts",
+  "publishedAt": "2026-05-26T12:00:00Z"
 }

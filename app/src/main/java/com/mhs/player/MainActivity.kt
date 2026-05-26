@@ -51,6 +51,25 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         handleIncomingIntent(intent)
 
+        // Observe playback state to configure Auto-PiP on Android 12+ (API 31+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            lifecycleScope.launch {
+                playerController.playbackState.collect { state ->
+                    val currentMediaItem = playerController.currentMedia.value
+                    val isPlayingVideo = state.isPlaying && currentMediaItem?.isVideo == true
+                    try {
+                        val params = PictureInPictureParams.Builder()
+                            .setAspectRatio(Rational(16, 9))
+                            .setAutoEnterEnabled(isPlayingVideo)
+                            .build()
+                        setPictureInPictureParams(params)
+                    } catch (e: Exception) {
+                        android.util.Log.e("MHSPlayer-PiP", "Error setting PiP params: ${e.message}")
+                    }
+                }
+            }
+        }
+
         // Load dark mode preference
         lifecycleScope.launch {
             val settings = settingsRepository.settings.first()
@@ -194,15 +213,29 @@ class MainActivity : ComponentActivity() {
         newConfig: Configuration
     ) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        playerController.isInPipMode.value = isInPictureInPictureMode
+    }
+
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val currentMediaItem = playerController.currentMedia.value
+            val isPlayingVideo = playerController.playbackState.value.isPlaying && currentMediaItem?.isVideo == true
+            if (isPlayingVideo) {
+                enterPipMode()
+            }
+        }
     }
 
     fun enterPipMode() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
-                val params = PictureInPictureParams.Builder()
+                val builder = PictureInPictureParams.Builder()
                     .setAspectRatio(Rational(16, 9))
-                    .build()
-                enterPictureInPictureMode(params)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    builder.setAutoEnterEnabled(true)
+                }
+                enterPictureInPictureMode(builder.build())
             }
         }
     }

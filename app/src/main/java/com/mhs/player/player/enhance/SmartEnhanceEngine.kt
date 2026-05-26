@@ -129,6 +129,11 @@ class SmartEnhanceGlShaderProgram(
     private var videoHeight = 1080
     private var isUsingFallbackPassthrough = false
 
+    // Cache dynamic system properties (battery saver, thermal status) to avoid high-frequency IPC binder deadlocks
+    private var lastStatusCheckTime = 0L
+    private var cachedIsBatterySaver = false
+    private var cachedIsThermalThrottling = false
+
     override fun configure(inputWidth: Int, inputHeight: Int): Size {
         videoWidth = inputWidth
         videoHeight = inputHeight
@@ -182,14 +187,21 @@ class SmartEnhanceGlShaderProgram(
     private fun drawWithProgram(program: GlProgram, inputTexId: Int, isPassthrough: Boolean) {
         program.use()
 
-        // Fetch dynamic status parameters for battery and thermal throttling state
-        val powerManager = context.getSystemService(Context.POWER_SERVICE) as? PowerManager
-        val isBatterySaver = powerManager?.isPowerSaveMode ?: false
-        val isThermalThrottling = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            powerManager?.getCurrentThermalStatus()?.let { it >= PowerManager.THERMAL_STATUS_MODERATE } ?: false
-        } else {
-            false
+        // Fetch dynamic status parameters from PowerManager periodically (every 5000ms) 
+        // to completely avoid high-frequency system IPC binder deadlocks on the GL thread
+        val now = android.os.SystemClock.elapsedRealtime()
+        if (now - lastStatusCheckTime >= 5000 || lastStatusCheckTime == 0L) {
+            lastStatusCheckTime = now
+            val powerManager = context.getSystemService(Context.POWER_SERVICE) as? PowerManager
+            cachedIsBatterySaver = powerManager?.isPowerSaveMode ?: false
+            cachedIsThermalThrottling = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                powerManager?.getCurrentThermalStatus()?.let { it >= PowerManager.THERMAL_STATUS_MODERATE } ?: false
+            } else {
+                false
+            }
         }
+        val isBatterySaver = cachedIsBatterySaver
+        val isThermalThrottling = cachedIsThermalThrottling
 
         // Read adaptive weights from our SmartEnhanceEngine
         val activeContrast = if (isPassthrough) 0f else SmartEnhanceEngine.getActiveContrast(1f, isThermalThrottling, isBatterySaver)
@@ -229,6 +241,19 @@ class SmartEnhanceGlShaderProgram(
 
         program.bindAttributesAndUniforms()
         android.opengl.GLES20.glDrawArrays(android.opengl.GLES20.GL_TRIANGLE_STRIP, 0, 4)
+    }
+
+    override fun release() {
+        super.release()
+        try {
+            glProgram?.delete()
+            glProgram = null
+            fallbackProgram?.delete()
+            fallbackProgram = null
+            Log.d("MHSPlayer-ShaderDebug", "SmartEnhanceGlShaderProgram GL resources released cleanly.")
+        } catch (e: Exception) {
+            Log.e("MHSPlayer-ShaderDebug", "Error releasing GlPrograms", e)
+        }
     }
 }
 
