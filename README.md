@@ -49,30 +49,41 @@ com.mhs.player
 ├── navigation/                  # Jetpack Compose Navigation Graph
 │
 ├── player/                      # Core player systems
-│   ├── audio/                   # Equalizer and audio effects managers
+│   ├── ai/
+│   │   └── translation/         # Cinema-grade AI translation engine
+│   │       └── SubtitleTranslator.kt  # Gemini + cloud translation chain
+│   │
+│   ├── audio/                   # Equalizer, audio effects & audio-only player
 │   │
 │   ├── controller/              # Playback controller and queue systems
 │   │   ├── PlayerController.kt  # Media3 ExoPlayer wrapper and unified state management
 │   │   └── PlaybackManager.kt   # History tracking & playback session recovery
 │   │
-│   ├── gestures/                # Sleek gesture controller & overlay components
-│   │   ├── GestureController.kt # Volume, brightness and seek handlers
-│   │   └── GestureOverlay.kt    # Composable gesture surface
+│   ├── controls/                # Composable player UI surface & overlay widgets
+│   │   ├── GestureOverlay.kt    # Touch gesture detection composable
+│   │   ├── CustomPlayerControls.kt
+│   │   └── SubtitleSearchSheet.kt
 │   │
-│   ├── service/                 # Media3 Background Playback Service
+│   ├── enhance/                 # GPU-accelerated Smart Enhance pipeline
+│   │   └── SmartEnhanceEngine.kt
+│   │
+│   ├── gestures/                # High-precision gesture state management
+│   │   └── GestureController.kt # Volume, brightness and seek handlers
+│   │
+│   ├── service/                 # Media3 Background Playback Service (MediaSession)
 │   │
 │   ├── subtitles/               # Subtitle structures, downloaders, and providers
-│   │   ├── providers/           # MSone, OpenSubtitles, and SubtitleCat plugins
-│   │   └── SrtParser.kt         # Custom high-performance .srt parser
-│   │
-│   ├── translation/             # Cinema-grade translation engine
-│   │   └── SubtitleTranslator.kt# Gemini and cloud translation chain
-│   │
-│   ├── ui/                      # Frosted sheets, controllers, and custom controls
+│   │   ├── parser/              # High-performance .srt and .ass parser
+│   │   └── providers/           # MSone, OpenSubtitles, and SubtitleCat plugins
 │   │
 │   └── utils/                   # Clean formatting and tag-stripping utilities
+│       └── SubtitleUtils.kt
 │
 ├── ui/                          # Screen layouts and theme specifications
+│   ├── components/
+│   ├── screens/
+│   └── theme/                   # Glassmorphic design tokens and typography
+│
 └── settings/                    # DataStore preferences repository
 ```
 

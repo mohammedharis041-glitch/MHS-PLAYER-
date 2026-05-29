@@ -104,6 +104,10 @@ class PlayerViewModel @Inject constructor(
     private var favoriteJob: Job? = null
     private var resizeOverlayJob: Job? = null
 
+    // Periodic auto-save state — class-level so it persists across emissions
+    @Volatile private var lastAutoSaveTime = 0L
+    private val AUTO_SAVE_INTERVAL_MS = 5_000L  // Save at most once every 5 seconds
+
     init {
         playerController.initPlayer()
         observePlaybackForSaving()
@@ -694,7 +698,9 @@ class PlayerViewModel @Inject constructor(
         val media = currentMedia.value
         val position = playerController.getCurrentPosition()
         if (media != null && position > 0) {
-            playbackManager.saveProgress(media, position)
+            // Use blocking save so DB write is guaranteed to complete before
+            // the coroutine scope or process is killed (critical for large files)
+            playbackManager.saveProgressBlocking(media, position)
         }
         playerController.stop()
     }
@@ -743,7 +749,7 @@ class PlayerViewModel @Inject constructor(
         val position = playerController.getCurrentPosition()
         // Save if more than 2 seconds, but don't save if it was just reset to 0 by skipToPrevious
         if (position > 2000) {
-            playbackManager.saveProgress(media, position)
+            playbackManager.saveProgress(media, position, force = true)
         }
     }
 
@@ -754,6 +760,10 @@ class PlayerViewModel @Inject constructor(
                 if (media == null) return@collectLatest
                 if (media.id == lastMediaId) return@collectLatest
                 lastMediaId = media.id
+
+                // Reset auto-save timer for the new media — prevents stale timer from
+                // firing immediately and overwriting the position we're about to seek to.
+                lastAutoSaveTime = 0L
 
                 // Track and sync favorite status for the current active media
                 checkFavorite(media.id)
@@ -802,34 +812,35 @@ class PlayerViewModel @Inject constructor(
 
     private fun checkAndPromptResume(media: MediaItemModel) {
         viewModelScope.launch {
-            val isCurrentlyPlaying = playerController.player.value?.isPlaying == true
-            val hasActivePlayback = playerController.player.value?.let { p ->
-                p.playbackState != androidx.media3.common.Player.STATE_IDLE && p.currentPosition > 2000L
-            } ?: false
-            
-            if (isCurrentlyPlaying || hasActivePlayback) {
-                Log.d("PlayerViewModel-Resume", "Player is already active (isPlaying=$isCurrentlyPlaying, pos=${playerController.player.value?.currentPosition}). Skipping resume prompt.")
-                return@launch
-            }
-
             val settings = settingsRepository.settings.first()
             val savedPosition = historyDao.getLastPosition(media.id) ?: 0L
-            
+            val dur = media.duration
+
             // Only prompt if progress is significant (>5s) and not at the very end (>95%)
-            val nearEnd = media.duration > 0 && savedPosition > (media.duration * 0.95)
-            
+            val nearEnd = dur > 0 && savedPosition > (dur * 0.95)
+
+            android.util.Log.d("MHSPlayer-Resume",
+                "checkAndPromptResume: title='${media.title}' savedPos=${savedPosition}ms " +
+                "duration=${dur}ms nearEnd=$nearEnd pref=${settings.resumePreference}")
+
             if (savedPosition > 5000 && !nearEnd) {
                 when (settings.resumePreference) {
                     SettingsRepository.ResumePreference.ALWAYS_RESUME -> {
+                        android.util.Log.d("MHSPlayer-Resume", "Auto-resuming to ${savedPosition}ms")
                         resumePlayback(savedPosition)
                     }
                     SettingsRepository.ResumePreference.ALWAYS_START_OVER -> {
+                        android.util.Log.d("MHSPlayer-Resume", "Starting over (user preference)")
                         // Stay at 0
                     }
                     SettingsRepository.ResumePreference.ASK -> {
+                        android.util.Log.d("MHSPlayer-Resume", "Showing resume dialog at ${savedPosition}ms")
                         _uiState.value = _uiState.value.copy(resumePromptPosition = savedPosition)
                     }
                 }
+            } else {
+                android.util.Log.d("MHSPlayer-Resume",
+                    "No resume prompt: savedPos=$savedPosition > 5000? ${savedPosition > 5000}, nearEnd=$nearEnd")
             }
         }
     }
@@ -887,14 +898,21 @@ class PlayerViewModel @Inject constructor(
 
     private fun observePlaybackForSaving() {
         viewModelScope.launch {
-            var lastSavedTime = 0L
-            playerController.playbackState.collectLatest { state ->
-                if (state.isPlaying && state.currentPosition > 5000) {
+            // Use `collect` (not `collectLatest`) so we never skip an emission.
+            // The inner debounce (lastAutoSaveTime) prevents DB hammering.
+            playerController.playbackState.collect { state ->
+                // Never auto-save while the resume dialog is showing — the player is still
+                // at position 0 (or near it), and saving here would overwrite the real
+                // saved position that we're about to resume to.
+                val resumeDialogActive = _uiState.value.resumePromptPosition != null
+                if (state.isPlaying && state.currentPosition > 5000 && !resumeDialogActive) {
                     val now = System.currentTimeMillis()
-                    if (now - lastSavedTime > 5000) { // Save at most once every 5 seconds
-                        lastSavedTime = now
-                        val media = currentMedia.value ?: return@collectLatest
-                        playbackManager.saveProgress(media, state.currentPosition)
+                    if (now - lastAutoSaveTime > AUTO_SAVE_INTERVAL_MS) {
+                        lastAutoSaveTime = now
+                        val media = currentMedia.value ?: return@collect
+                        // Force=true so PlaybackManager's internal debounce doesn't block us;
+                        // our own lastAutoSaveTime guard is sufficient.
+                        playbackManager.saveProgress(media, state.currentPosition, force = true)
                     }
                 }
             }

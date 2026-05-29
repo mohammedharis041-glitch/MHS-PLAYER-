@@ -42,6 +42,7 @@ fun FoldersScreen(
     viewModel: MediaViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var folderToExclude by remember { mutableStateOf<FolderModel?>(null) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -85,18 +86,87 @@ fun FoldersScreen(
                         folder = folder,
                         onClick = {
                             navController.navigate(Screen.FolderContent.createRoute(folder.path))
+                        },
+                        onExcludeClick = {
+                            folderToExclude = folder
                         }
                     )
                 }
             }
         }
     }
+
+    folderToExclude?.let { folder ->
+        AlertDialog(
+            onDismissRequest = { folderToExclude = null },
+            icon = {
+                Icon(
+                    Icons.Default.VisibilityOff,
+                    null,
+                    tint = themeAccent(),
+                    modifier = Modifier.size(36.dp)
+                )
+            },
+            title = {
+                Text(
+                    text = "Exclude Folder?",
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "Are you sure you want to exclude this folder from scanning?",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = folder.path,
+                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+                        color = themeAccent().copy(alpha = 0.8f),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = "All media files within this folder will be hidden from the library. You can restore it later from Settings -> Library & Folders.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.excludeFolder(folder.path, folder.name)
+                        folderToExclude = null
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = themeAccent(),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("Exclude")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { folderToExclude = null }
+                ) {
+                    Text("Cancel", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            shape = RoundedCornerShape(24.dp)
+        )
+    }
 }
 
 @Composable
 private fun FolderListItem(
     folder: FolderModel,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onExcludeClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -152,7 +222,36 @@ private fun FolderListItem(
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
             }
-            Icon(Icons.Default.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+            var showMenu by remember { mutableStateOf(false) }
+            Box(contentAlignment = Alignment.Center) {
+                IconButton(onClick = { showMenu = true }) {
+                    Icon(
+                        Icons.Default.MoreVert,
+                        contentDescription = "Options",
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false },
+                    modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Exclude Folder", color = MaterialTheme.colorScheme.onErrorContainer) },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.VisibilityOff,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        },
+                        onClick = {
+                            showMenu = false
+                            onExcludeClick()
+                        }
+                    )
+                }
+            }
         }
     }
 }

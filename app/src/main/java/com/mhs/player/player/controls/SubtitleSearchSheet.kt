@@ -98,10 +98,15 @@ data class SubtitleSearchUiState(
 )
 
 private val SUBTITLE_LANGUAGES = listOf(
-    "ml" to "Malayalam", "ta" to "Tamil", "hi" to "Hindi", "te" to "Telugu", 
-    "kn" to "Kannada", "en" to "English", "ar" to "Arabic", "fr" to "French", 
-    "de" to "German", "es" to "Spanish", "pt" to "Portuguese", "ru" to "Russian", 
-    "tr" to "Turkish", "zh" to "Chinese", "ja" to "Japanese", "ko" to "Korean"
+    "ml" to "Malayalam", "ta" to "Tamil", "hi" to "Hindi", "te" to "Telugu",
+    "kn" to "Kannada", "en" to "English", "ar" to "Arabic", "fr" to "French",
+    "de" to "German", "es" to "Spanish", "pt" to "Portuguese", "ru" to "Russian",
+    "tr" to "Turkish", "zh" to "Chinese", "ja" to "Japanese", "ko" to "Korean",
+    "it" to "Italian", "nl" to "Dutch", "pl" to "Polish", "id" to "Indonesian",
+    "vi" to "Vietnamese", "th" to "Thai", "sv" to "Swedish", "no" to "Norwegian",
+    "da" to "Danish", "fi" to "Finnish", "cs" to "Czech", "ro" to "Romanian",
+    "hu" to "Hungarian", "el" to "Greek", "he" to "Hebrew", "fa" to "Persian",
+    "ur" to "Urdu", "bn" to "Bengali", "si" to "Sinhala"
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -128,14 +133,17 @@ fun SubtitleSearchSheet(
         viewModel.search(query, videoPath, selectedLang, apiKey)
     }
 
-    LaunchedEffect(videoFilename, selectedLang) {
-        if (state.results.isEmpty() && !state.isLoading && videoFilename.isNotBlank()) {
+    // Re-search whenever the language chip changes — always, not just when empty.
+    // This ensures switching from Malayalam to English gives fresh English results.
+    LaunchedEffect(selectedLang) {
+        if (videoFilename.isNotBlank()) {
             viewModel.autoSearch(videoFilename, videoPath, selectedLang, apiKey)
         }
     }
 
-    if (state.query.isNotBlank()) {
-        LaunchedEffect(state.query) {
+    // Keep query box in sync with any programmatic query updates
+    LaunchedEffect(state.query) {
+        if (state.query.isNotBlank() && state.query != query) {
             query = state.query
         }
     }
@@ -231,7 +239,10 @@ fun SubtitleSearchSheet(
                                 selected = selectedLang == code,
                                 onClick = {
                                     selectedLang = code
-                                    performSearch()
+                                    // Always do a fresh search for the newly selected language
+                                    keyboardController?.hide()
+                                    focusManager.clearFocus()
+                                    viewModel.search(query.ifBlank { viewModel.state.value.query }, videoPath, code, apiKey)
                                 },
                                 label = { Text(name, style = MaterialTheme.typography.labelMedium) },
                                 shape = AppShapes.RoundedMD,

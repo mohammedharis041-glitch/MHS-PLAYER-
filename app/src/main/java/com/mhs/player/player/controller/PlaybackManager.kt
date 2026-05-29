@@ -9,6 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -61,12 +62,12 @@ class PlaybackManager @Inject constructor(
     }
 
     /**
-     * Saves the current playback position to the database.
+     * Saves the current playback position to the database (async, debounced).
      *
      * Debounced to at most once every [SAVE_INTERVAL_MS] milliseconds to
      * prevent OOM caused by spawning a new Room transaction on every player tick.
      *
-     * @param force Set to true to bypass the interval (e.g. on playback stop/complete).
+     * @param force Set to true to bypass the interval (e.g. periodic auto-save from ViewModel).
      */
     fun saveProgress(item: MediaItemModel, position: Long, force: Boolean = false) {
         val now = System.currentTimeMillis()
@@ -76,11 +77,33 @@ class PlaybackManager @Inject constructor(
         scope.launch {
             try {
                 historyDao.updatePosition(item.id, position)
+                android.util.Log.d("PlaybackManager", "Saved position ${position}ms for '${item.title}'")
             } catch (e: OutOfMemoryError) {
                 android.util.Log.e("PlaybackManager", "OOM saving progress — skipping", e)
             } catch (e: Exception) {
                 android.util.Log.w("PlaybackManager", "Failed to save progress: ${e.message}")
             }
+        }
+    }
+
+    /**
+     * Saves the current playback position SYNCHRONOUSLY (blocking the calling thread).
+     *
+     * Use this ONLY when the player is being stopped/disposed to guarantee the write
+     * completes before the coroutine scope is cancelled (e.g., process death).
+     * Never call this during active playback — use [saveProgress] instead.
+     */
+    fun saveProgressBlocking(item: MediaItemModel, position: Long) {
+        if (position <= 0L) return
+        try {
+            runBlocking(Dispatchers.IO) {
+                historyDao.updatePosition(item.id, position)
+                android.util.Log.d("PlaybackManager", "[BLOCKING] Saved position ${position}ms for '${item.title}'")
+            }
+        } catch (e: OutOfMemoryError) {
+            android.util.Log.e("PlaybackManager", "OOM in blocking save — skipping", e)
+        } catch (e: Exception) {
+            android.util.Log.w("PlaybackManager", "Failed in blocking save: ${e.message}")
         }
     }
 

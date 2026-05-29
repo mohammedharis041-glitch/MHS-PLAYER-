@@ -9,6 +9,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mhs.player.database.FavoritesDao
 import com.mhs.player.database.HistoryDao
+import com.mhs.player.database.HiddenFolder
+import com.mhs.player.database.HiddenFolderDao
 import com.mhs.player.media.folders.FolderManager
 import com.mhs.player.media.model.*
 import com.mhs.player.media.scanner.MediaScanner
@@ -55,7 +57,8 @@ class MediaViewModel @Inject constructor(
     private val searchManager: SearchManager,
     private val historyDao: HistoryDao,
     private val favoritesDao: FavoritesDao,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val hiddenFolderDao: HiddenFolderDao
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MediaUiState())
@@ -68,6 +71,24 @@ class MediaViewModel @Inject constructor(
     val favorites = favoritesDao.getAllFavorites().stateIn(
         viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList()
     )
+
+    val excludedFolders = hiddenFolderDao.getAllHiddenFolders().stateIn(
+        viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList()
+    )
+
+    fun excludeFolder(path: String, name: String) {
+        viewModelScope.launch {
+            hiddenFolderDao.hideFolder(HiddenFolder(folderPath = path, folderName = name))
+            refresh()
+        }
+    }
+
+    fun restoreFolder(path: String) {
+        viewModelScope.launch {
+            hiddenFolderDao.unhideFolder(path)
+            refresh()
+        }
+    }
 
     init {
         checkPermissionAndLoad()

@@ -35,6 +35,7 @@ sealed class Screen(val route: String) {
     object History : Screen("history")
     object Favorites : Screen("favorites")
     object Settings : Screen("settings")
+    object ExcludedFolders : Screen("excluded_folders")
     object Update : Screen("update")
     object Player : Screen("player/{mediaId}/{queueIndex}") {
         fun createRoute(mediaId: Long, queueIndex: Int) = "player/$mediaId/$queueIndex"
@@ -197,6 +198,13 @@ fun AppNavigation(
             }
             composable(Screen.Settings.route) {
                 SettingsScreen(navController = navController)
+            }
+            composable(Screen.ExcludedFolders.route) {
+                val mediaViewModel: MediaViewModel = hiltViewModel()
+                ExcludedFoldersScreen(
+                    navController = navController,
+                    viewModel = mediaViewModel
+                )
             }
             composable(Screen.Update.route) {
                 val updateViewModel: com.mhs.player.updater.UpdateViewModel = hiltViewModel()

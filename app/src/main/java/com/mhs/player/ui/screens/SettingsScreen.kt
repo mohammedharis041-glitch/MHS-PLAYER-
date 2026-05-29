@@ -42,6 +42,13 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
+    var expandedPlayback by remember { mutableStateOf(false) }
+    var expandedVideo by remember { mutableStateOf(false) }
+    var expandedAudio by remember { mutableStateOf(false) }
+    var expandedSubtitles by remember { mutableStateOf(false) }
+    var expandedGestures by remember { mutableStateOf(false) }
+    var expandedLibrary by remember { mutableStateOf(false) }
+    var expandedAbout by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -73,289 +80,473 @@ fun SettingsScreen(
         ) {
 
             // ── PLAYBACK ────────────────────────────────────────────────
-            item { SettingsSectionHeader("Playback", Icons.Default.PlayCircle) }
-
             item {
-                // Seek duration chip selector
-                SettingsChipSelector(
-                    icon = Icons.Default.FastForward,
-                    title = "Double-Tap Seek Duration",
-                    subtitle = "Seconds skipped per double tap",
-                    options = listOf(5, 10, 15, 30),
-                    selectedValue = settings.seekDurationPreset,
-                    onSelect = { viewModel.setSeekDurationPreset(it) },
-                    labelFor = { "${it}s" }
-                )
-            }
-
-            item {
-                SettingsSwitchItem(
-                    icon = Icons.Default.Memory,
-                    title = "Hardware Decoding",
-                    subtitle = "Use GPU for video decoding",
-                    checked = settings.hardwareDecoding,
-                    onCheckedChange = viewModel::setHardwareDecoding
-                )
-            }
-
-            item {
-                SettingsSwitchItem(
-                    icon = Icons.Default.Speed,
-                    title = "Enhanced Playback Mode",
-                    subtitle = "Ultra-low latency hardware decoding & snappier seeking (MX HW+ style)",
-                    checked = settings.enhancedPlaybackMode,
-                    onCheckedChange = viewModel::setEnhancedPlaybackMode
-                )
-            }
-
-            item {
-                SettingsSwitchItem(
-                    icon = Icons.Default.SaveAlt,
-                    title = "Remember Position",
-                    subtitle = "Resume from where you left off",
-                    checked = settings.rememberPosition,
-                    onCheckedChange = viewModel::setRememberPosition
-                )
-            }
-
-            item {
-                val resumeLabel = when (settings.resumePreference) {
-                    com.mhs.player.settings.SettingsRepository.ResumePreference.ALWAYS_RESUME -> "Always Resume"
-                    com.mhs.player.settings.SettingsRepository.ResumePreference.ALWAYS_START_OVER -> "Always Start Over"
-                    else -> "Ask every time"
-                }
-                SettingsActionItem(
+                SettingsSectionHeader(
+                    title = "Playback",
                     icon = Icons.Default.PlayCircle,
-                    title = "Resume Preference",
-                    subtitle = resumeLabel,
-                    actionLabel = if (settings.resumePreference != com.mhs.player.settings.SettingsRepository.ResumePreference.ASK) "Reset" else null,
-                    onAction = { viewModel.resetResumePreference() }
+                    isExpanded = expandedPlayback,
+                    onToggle = { expandedPlayback = !expandedPlayback }
                 )
             }
 
+            if (expandedPlayback) {
+                item {
+                    SettingsSwitchItem(
+                        icon = Icons.Default.Speed,
+                        title = "Enhanced Playback Mode",
+                        subtitle = "Ultra-low latency hardware decoding & snappier seeking (MX HW+ style)",
+                        checked = settings.enhancedPlaybackMode,
+                        onCheckedChange = viewModel::setEnhancedPlaybackMode
+                    )
+                }
+
+                item {
+                    SettingsSwitchItem(
+                        icon = Icons.Default.Memory,
+                        title = "Hardware Decoding",
+                        subtitle = "Use GPU for video decoding",
+                        checked = settings.hardwareDecoding,
+                        onCheckedChange = viewModel::setHardwareDecoding
+                    )
+                }
+
+                item {
+                    SettingsChipSelector(
+                        icon = Icons.Default.PlayCircle,
+                        title = "Resume Preference",
+                        subtitle = "How the player resumes video progress",
+                        options = com.mhs.player.settings.SettingsRepository.ResumePreference.entries.toList(),
+                        selectedValue = settings.resumePreference,
+                        onSelect = { viewModel.setResumePreference(it) },
+                        labelFor = { pref ->
+                            when (pref) {
+                                com.mhs.player.settings.SettingsRepository.ResumePreference.ALWAYS_RESUME -> "Always Resume"
+                                com.mhs.player.settings.SettingsRepository.ResumePreference.ALWAYS_START_OVER -> "Start Over"
+                                com.mhs.player.settings.SettingsRepository.ResumePreference.ASK -> "Ask Every Time"
+                            }
+                        }
+                    )
+                }
+
+                item {
+                    SettingsSwitchItem(
+                        icon = Icons.Default.SaveAlt,
+                        title = "Remember Position",
+                        subtitle = "Resume from where you left off",
+                        checked = settings.rememberPosition,
+                        onCheckedChange = viewModel::setRememberPosition
+                    )
+                }
+
+                item {
+                    SettingsChipSelector(
+                        icon = Icons.Default.ScreenRotation,
+                        title = "Screen Orientation",
+                        subtitle = "Default orientation for video playback",
+                        options = com.mhs.player.settings.SettingsRepository.OrientationMode.entries.toList(),
+                        selectedValue = settings.orientationMode,
+                        onSelect = { viewModel.setOrientationMode(it) },
+                        labelFor = { mode ->
+                            mode.name.lowercase().replaceFirstChar { it.uppercase() }
+                        }
+                    )
+                }
+
+                item {
+                    SettingsSwitchItem(
+                        icon = Icons.Default.PictureInPicture,
+                        title = "Auto PiP on Home",
+                        subtitle = "Enter PiP when pressing home button",
+                        checked = settings.pipOnHome,
+                        onCheckedChange = viewModel::setPipOnHome
+                    )
+                }
+            }
+
+            // ── VIDEO ───────────────────────────────────────────────────
             item {
-                SettingsChipSelector(
-                    icon = Icons.Default.ScreenRotation,
-                    title = "Screen Orientation",
-                    subtitle = "Default orientation for video playback",
-                    options = com.mhs.player.settings.SettingsRepository.OrientationMode.entries.toList(),
-                    selectedValue = settings.orientationMode,
-                    onSelect = { viewModel.setOrientationMode(it) },
-                    labelFor = { mode ->
-                        mode.name.lowercase().replaceFirstChar { it.uppercase() }
-                    }
+                SettingsSectionHeader(
+                    title = "Video",
+                    icon = Icons.Default.Movie,
+                    isExpanded = expandedVideo,
+                    onToggle = { expandedVideo = !expandedVideo }
                 )
             }
 
-            item {
-                SettingsSwitchItem(
-                    icon = Icons.Default.PictureInPicture,
-                    title = "Auto PiP on Home",
-                    subtitle = "Enter PiP when pressing home button",
-                    checked = settings.pipOnHome,
-                    onCheckedChange = viewModel::setPipOnHome
-                )
+            if (expandedVideo) {
+                item {
+                    SettingsSwitchItem(
+                        icon = Icons.Default.AutoAwesome,
+                        title = "Smart Enhance",
+                        subtitle = "Dynamically optimize color, contrast, and noise reduction",
+                        checked = settings.smartEnhanceEnabled,
+                        onCheckedChange = viewModel::setSmartEnhanceEnabled
+                    )
+                }
+
+                item {
+                    SettingsSwitchItem(
+                        icon = Icons.Default.AspectRatio,
+                        title = "Hardware Scaling",
+                        subtitle = "Use device hardware scaler for video zoom and resize",
+                        checked = settings.hardwareScaling,
+                        onCheckedChange = viewModel::setHardwareScaling
+                    )
+                }
+
+                item {
+                    SettingsSwitchItem(
+                        icon = Icons.Default.Fullscreen,
+                        title = "Faster Fullscreen",
+                        subtitle = "Reduce layout passes for instant video transition",
+                        checked = settings.fasterFullscreen,
+                        onCheckedChange = viewModel::setFasterFullscreen
+                    )
+                }
+
+                item {
+                    SettingsSwitchItem(
+                        icon = Icons.Default.SlowMotionVideo,
+                        title = "Surface Stabilization",
+                        subtitle = "Smoothen video frame rendering and reduce jitter",
+                        checked = settings.surfaceStabilization,
+                        onCheckedChange = viewModel::setSurfaceStabilization
+                    )
+                }
+
+                item {
+                    SettingsSliderItem(
+                        icon = Icons.Default.HighQuality,
+                        title = "Thumbnail Quality",
+                        subtitle = "Level ${settings.thumbnailQuality} — ${listOf("Low", "Medium", "High", "Ultra")[settings.thumbnailQuality.coerceIn(0, 3)]}",
+                        value = settings.thumbnailQuality.toFloat(),
+                        valueRange = 0f..3f,
+                        steps = 2,
+                        onValueChange = { viewModel.setThumbnailQuality(it.toInt()) }
+                    )
+                }
             }
 
-            // ── GESTURES ────────────────────────────────────────────────
-            item { SettingsSectionHeader("Gestures", Icons.Default.TouchApp) }
-
+            // ── AUDIO ───────────────────────────────────────────────────
             item {
-                SettingsSwitchItem(
-                    icon = Icons.Default.TouchApp,
-                    title = "Double Tap Seek",
-                    subtitle = "Double tap sides to seek forward/backward",
-                    checked = settings.doubleTapSeek,
-                    onCheckedChange = viewModel::setDoubleTapSeek
-                )
-            }
-
-            item {
-                SettingsSwitchItem(
-                    icon = Icons.Default.Brightness6,
-                    title = "Brightness Gesture",
-                    subtitle = "Swipe left side to adjust brightness",
-                    checked = settings.brightnessGesture,
-                    onCheckedChange = viewModel::setBrightnessGesture
-                )
-            }
-
-            item {
-                SettingsSwitchItem(
+                SettingsSectionHeader(
+                    title = "Audio",
                     icon = Icons.Default.VolumeUp,
-                    title = "Volume Gesture",
-                    subtitle = "Swipe right side to adjust volume",
-                    checked = settings.volumeGesture,
-                    onCheckedChange = viewModel::setVolumeGesture
+                    isExpanded = expandedAudio,
+                    onToggle = { expandedAudio = !expandedAudio }
                 )
             }
 
-            item {
-                SettingsSliderItem(
-                    icon = Icons.Default.SwipeRight,
-                    title = "Seek Speed",
-                    subtitle = "Swipe left/right: ${(settings.seekSensitivity * 100).toInt()}% speed",
-                    value = settings.seekSensitivity,
-                    valueRange = 0.3f..3.0f,
-                    steps = 8,
-                    onValueChange = viewModel::setSeekSensitivity
-                )
-            }
+            if (expandedAudio) {
+                item {
+                    SettingsSwitchItem(
+                        icon = Icons.Default.VolumeUp,
+                        title = "Volume Gesture",
+                        subtitle = "Swipe right side of player screen to adjust volume",
+                        checked = settings.volumeGesture,
+                        onCheckedChange = viewModel::setVolumeGesture
+                    )
+                }
 
-            item {
-                SettingsSliderItem(
-                    icon = Icons.Default.Speed,
-                    title = "Swipe Speed",
-                    subtitle = "Volume/Brightness: ${(settings.swipeSensitivity * 100).toInt()}% speed",
-                    value = settings.swipeSensitivity,
-                    valueRange = 0.3f..3.0f,
-                    steps = 8,
-                    onValueChange = viewModel::setSwipeSensitivity
-                )
+                item {
+                    SettingsSwitchItem(
+                        icon = Icons.Default.VolumeUp,
+                        title = "Audio Boost",
+                        subtitle = "Enable soft volume boosting up to 200% gain",
+                        checked = settings.audioBoost,
+                        onCheckedChange = viewModel::setAudioBoost
+                    )
+                }
+
+                item {
+                    SettingsSwitchItem(
+                        icon = Icons.Default.Tune,
+                        title = "Equalizer",
+                        subtitle = "Enable premium hardware audio equalizer and bands",
+                        checked = settings.equalizerEnabled,
+                        onCheckedChange = viewModel::setEqualizerEnabled
+                    )
+                }
             }
 
             // ── SUBTITLES ───────────────────────────────────────────────
-            item { SettingsSectionHeader("Subtitles", Icons.Default.Subtitles) }
-
             item {
-                SettingsSliderItem(
-                    icon = Icons.Default.TextFields,
-                    title = "Subtitle Size",
-                    subtitle = "${settings.subtitleSize.toInt()}sp",
-                    value = settings.subtitleSize,
-                    valueRange = 10f..28f,
-                    steps = 8,
-                    onValueChange = viewModel::setSubtitleSize
+                SettingsSectionHeader(
+                    title = "Subtitles",
+                    icon = Icons.Default.Subtitles,
+                    isExpanded = expandedSubtitles,
+                    onToggle = { expandedSubtitles = !expandedSubtitles }
                 )
             }
 
-            item {
-                SettingsSwitchItem(
-                    icon = Icons.Default.BackupTable,
-                    title = "Subtitle Background",
-                    subtitle = "Show background behind subtitles",
-                    checked = settings.subtitleBackground,
-                    onCheckedChange = viewModel::setSubtitleBackground
-                )
-            }
+            if (expandedSubtitles) {
+                item {
+                    SettingsSliderItem(
+                        icon = Icons.Default.TextFields,
+                        title = "Subtitle Size",
+                        subtitle = "${settings.subtitleSize.toInt()}sp",
+                        value = settings.subtitleSize,
+                        valueRange = 10f..28f,
+                        steps = 8,
+                        onValueChange = viewModel::setSubtitleSize
+                    )
+                }
 
-            item {
-                SettingsChipSelector(
-                    icon = Icons.Default.Language,
-                    title = "Subtitle Search Language",
-                    subtitle = "Default language for auto subtitle search",
-                    options = listOf("en", "ar", "fr", "de", "es", "tr", "ru"),
-                    selectedValue = settings.subtitleLanguage,
-                    onSelect = { viewModel.setSubtitleLanguage(it) },
-                    labelFor = { lang ->
-                        mapOf("en" to "EN", "ar" to "AR", "fr" to "FR", "de" to "DE",
-                            "es" to "ES", "tr" to "TR", "ru" to "RU")[lang] ?: lang.uppercase()
-                    }
-                )
-            }
+                item {
+                    SettingsSwitchItem(
+                        icon = Icons.Default.BackupTable,
+                        title = "Subtitle Background",
+                        subtitle = "Show background behind subtitles",
+                        checked = settings.subtitleBackground,
+                        onCheckedChange = viewModel::setSubtitleBackground
+                    )
+                }
 
-            item {
-                var apiKeyExpanded by remember { mutableStateOf(false) }
-                var apiKeyText by remember { mutableStateOf(settings.subtitleApiKey) }
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp)
-                ) {
-                    Row(
+                item {
+                    SettingsSliderItem(
+                        icon = Icons.Default.Opacity,
+                        title = "Subtitle Opacity",
+                        subtitle = "${(settings.subtitleOpacity * 100).toInt()}% visibility",
+                        value = settings.subtitleOpacity,
+                        valueRange = 0.2f..1.0f,
+                        steps = 8,
+                        onValueChange = viewModel::setSubtitleOpacity
+                    )
+                }
+
+                item {
+                    SettingsSliderItem(
+                        icon = Icons.Default.Subtitles,
+                        title = "Subtitle Position",
+                        subtitle = "Vertical bottom offset: ${(settings.subtitlePosition * 100).toInt()}%",
+                        value = settings.subtitlePosition,
+                        valueRange = 0.0f..0.25f,
+                        steps = 10,
+                        onValueChange = viewModel::setSubtitlePosition
+                    )
+                }
+
+                item {
+                    SettingsSwitchItem(
+                        icon = Icons.Default.Subtitles,
+                        title = "Subtitle Shadow Effect",
+                        subtitle = "Draw thick outline and shadow behind text",
+                        checked = settings.subtitleShadowEnabled,
+                        onCheckedChange = viewModel::setSubtitleShadowEnabled
+                    )
+                }
+
+                item {
+                    SettingsChipSelector(
+                        icon = Icons.Default.Language,
+                        title = "Subtitle Search Language",
+                        subtitle = "Default language for auto subtitle search",
+                        options = listOf("en", "ar", "fr", "de", "es", "tr", "ru"),
+                        selectedValue = settings.subtitleLanguage,
+                        onSelect = { viewModel.setSubtitleLanguage(it) },
+                        labelFor = { lang ->
+                            mapOf("en" to "EN", "ar" to "AR", "fr" to "FR", "de" to "DE",
+                                "es" to "ES", "tr" to "TR", "ru" to "RU")[lang] ?: lang.uppercase()
+                        }
+                    )
+                }
+
+                item {
+                    var apiKeyExpanded by remember { mutableStateOf(false) }
+                    var apiKeyText by remember { mutableStateOf(settings.subtitleApiKey) }
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { apiKeyExpanded = !apiKeyExpanded }
-                            .padding(vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            .padding(horizontal = 16.dp, vertical = 4.dp)
                     ) {
-                        Icon(Icons.Default.Key, null, tint = OnSurfaceVariant, modifier = Modifier.size(24.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text("OpenSubtitles API Key", style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onBackground)
-                            Text(
-                                if (settings.subtitleApiKey.isBlank()) "Optional — tap to set for higher rate limits"
-                                else "••••••••${settings.subtitleApiKey.takeLast(4)}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { apiKeyExpanded = !apiKeyExpanded }
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Icon(Icons.Default.Key, null, tint = OnSurfaceVariant, modifier = Modifier.size(24.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("OpenSubtitles API Key", style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onBackground)
+                                Text(
+                                    if (settings.subtitleApiKey.isBlank()) "Optional — tap to set for higher rate limits"
+                                    else "••••••••${settings.subtitleApiKey.takeLast(4)}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Icon(
+                                if (apiKeyExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                null, tint = OnSurfaceVariant
                             )
                         }
-                        Icon(
-                            if (apiKeyExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                            null, tint = OnSurfaceVariant
-                        )
-                    }
-                    AnimatedVisibility(visible = apiKeyExpanded) {
-                        Column {
-                            OutlinedTextField(
-                                value = apiKeyText,
-                                onValueChange = { apiKeyText = it },
-                                modifier = Modifier.fillMaxWidth(),
-                                placeholder = { Text("Paste API key here…") },
-                                singleLine = true,
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = themeAccent(),
-                                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                                    unfocusedTextColor = MaterialTheme.colorScheme.onBackground
+                        AnimatedVisibility(visible = apiKeyExpanded) {
+                            Column {
+                                OutlinedTextField(
+                                    value = apiKeyText,
+                                    onValueChange = { apiKeyText = it },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    placeholder = { Text("Paste API key here…") },
+                                    singleLine = true,
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedBorderColor = themeAccent(),
+                                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                                        unfocusedTextColor = MaterialTheme.colorScheme.onBackground
+                                    )
                                 )
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            TextButton(
-                                onClick = {
-                                    viewModel.setSubtitleApiKey(apiKeyText)
-                                    apiKeyExpanded = false
-                                },
-                                modifier = Modifier.align(Alignment.End)
-                            ) { Text("Save", color = themeAccent()) }
+                                Spacer(Modifier.height(4.dp))
+                                TextButton(
+                                    onClick = {
+                                        viewModel.setSubtitleApiKey(apiKeyText)
+                                        apiKeyExpanded = false
+                                    },
+                                    modifier = Modifier.align(Alignment.End)
+                                 ) { Text("Save", color = themeAccent()) }
+                            }
                         }
                     }
                 }
             }
 
-
-            // ── APPEARANCE ──────────────────────────────────────────────
-            item { SettingsSectionHeader("Appearance", Icons.Default.Palette) }
-
+            // ── GESTURES & CONTROLS ──────────────────────────────────────
             item {
-                SettingsSwitchItem(
-                    icon = Icons.Default.Nightlight,
-                    title = "Dark Mode",
-                    subtitle = if (settings.darkMode) "AMOLED black theme" else "Light theme",
-                    checked = settings.darkMode,
-                    onCheckedChange = viewModel::setDarkMode
+                SettingsSectionHeader(
+                    title = "Gestures & Controls",
+                    icon = Icons.Default.TouchApp,
+                    isExpanded = expandedGestures,
+                    onToggle = { expandedGestures = !expandedGestures }
                 )
             }
 
+            if (expandedGestures) {
+                item {
+                    SettingsSwitchItem(
+                        icon = Icons.Default.TouchApp,
+                        title = "Double Tap Seek",
+                        subtitle = "Double tap sides of player to seek skip",
+                        checked = settings.doubleTapSeek,
+                        onCheckedChange = viewModel::setDoubleTapSeek
+                    )
+                }
+
+                item {
+                    SettingsChipSelector(
+                        icon = Icons.Default.FastForward,
+                        title = "Double-Tap Seek Duration",
+                        subtitle = "Seconds skipped per double tap",
+                        options = listOf(5, 10, 15, 30),
+                        selectedValue = settings.seekDurationPreset,
+                        onSelect = { viewModel.setSeekDurationPreset(it) },
+                        labelFor = { "${it}s" }
+                    )
+                }
+
+                item {
+                    SettingsSwitchItem(
+                        icon = Icons.Default.TouchApp,
+                        title = "Swipe Seek Gesture",
+                        subtitle = "Swipe left/right on screen to seek forward/backward",
+                        checked = settings.seekGesture,
+                        onCheckedChange = viewModel::setSeekGesture
+                    )
+                }
+
+                item {
+                    SettingsSliderItem(
+                        icon = Icons.Default.SwipeRight,
+                        title = "Seek Sensitivity Speed",
+                        subtitle = "Swipe seek multiplier: ${(settings.seekSensitivity * 100).toInt()}% speed",
+                        value = settings.seekSensitivity,
+                        valueRange = 0.3f..3.0f,
+                        steps = 8,
+                        onValueChange = viewModel::setSeekSensitivity
+                    )
+                }
+
+                item {
+                    SettingsSwitchItem(
+                        icon = Icons.Default.Brightness6,
+                        title = "Brightness Gesture",
+                        subtitle = "Swipe left side of player screen to adjust brightness",
+                        checked = settings.brightnessGesture,
+                        onCheckedChange = viewModel::setBrightnessGesture
+                    )
+                }
+
+                item {
+                    SettingsSliderItem(
+                        icon = Icons.Default.Speed,
+                        title = "Swipe Sensitivity Speed",
+                        subtitle = "Volume/Brightness sensitivity: ${(settings.swipeSensitivity * 100).toInt()}% speed",
+                        value = settings.swipeSensitivity,
+                        valueRange = 0.3f..3.0f,
+                        steps = 8,
+                        onValueChange = viewModel::setSwipeSensitivity
+                    )
+                }
+            }
+
+            // ── LIBRARY & APPEARANCE ────────────────────────────────────
             item {
-                SettingsSliderItem(
-                    icon = Icons.Default.HighQuality,
-                    title = "Thumbnail Quality",
-                    subtitle = "Level ${settings.thumbnailQuality} — ${listOf("Low", "Medium", "High", "Ultra")[settings.thumbnailQuality.coerceIn(0, 3)]}",
-                    value = settings.thumbnailQuality.toFloat(),
-                    valueRange = 0f..3f,
-                    steps = 2,
-                    onValueChange = { viewModel.setThumbnailQuality(it.toInt()) }
+                SettingsSectionHeader(
+                    title = "Library & Appearance",
+                    icon = Icons.Default.Folder,
+                    isExpanded = expandedLibrary,
+                    onToggle = { expandedLibrary = !expandedLibrary }
                 )
+            }
+
+            if (expandedLibrary) {
+                item {
+                    SettingsActionItem(
+                        icon = Icons.Default.Folder,
+                        title = "Excluded Folders",
+                        subtitle = "Manage folders excluded from library scanning",
+                        actionLabel = "Manage",
+                        onAction = { navController.navigate(Screen.ExcludedFolders.route) }
+                    )
+                }
+
+                item {
+                    SettingsSwitchItem(
+                        icon = Icons.Default.Nightlight,
+                        title = "Dark Mode",
+                        subtitle = if (settings.darkMode) "AMOLED black theme" else "Light theme",
+                        checked = settings.darkMode,
+                        onCheckedChange = viewModel::setDarkMode
+                    )
+                }
             }
 
             // ── ABOUT ───────────────────────────────────────────────────
-            item { SettingsSectionHeader("About", Icons.Default.Info) }
-
             item {
-                SettingsInfoItem(
+                SettingsSectionHeader(
+                    title = "About",
                     icon = Icons.Default.Info,
-                    title = "MHS Player",
-                    subtitle = "Version ${BuildConfig.VERSION_NAME} — Premium Media Player"
+                    isExpanded = expandedAbout,
+                    onToggle = { expandedAbout = !expandedAbout }
                 )
             }
 
-            item {
-                val updateViewModel: UpdateViewModel = hiltViewModel()
-                UpdateCard(
-                    viewModel = updateViewModel,
-                    onNavigateToUpdateScreen = { navController.navigate(Screen.Update.route) }
-                )
+            if (expandedAbout) {
+                item {
+                    SettingsInfoItem(
+                        icon = Icons.Default.Info,
+                        title = "MHS Player",
+                        subtitle = "Version ${BuildConfig.VERSION_NAME} — Premium Media Player"
+                    )
+                }
+
+                item {
+                    val updateViewModel: UpdateViewModel = hiltViewModel()
+                    UpdateCard(
+                        viewModel = updateViewModel,
+                        onNavigateToUpdateScreen = { navController.navigate(Screen.Update.route) }
+                    )
+                }
             }
         }
     }
@@ -364,11 +555,18 @@ fun SettingsScreen(
 // ─────────────────────────────────── COMPONENTS ───────────────────────────────────
 
 @Composable
-private fun SettingsSectionHeader(title: String, icon: ImageVector) {
+private fun SettingsSectionHeader(
+    title: String,
+    icon: ImageVector,
+    isExpanded: Boolean,
+    onToggle: () -> Unit
+) {
+    val haptics = rememberHaptics()
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, top = 24.dp, bottom = 4.dp, end = 16.dp),
+            .clickable { haptics.click(); onToggle() }
+            .padding(start = 16.dp, top = 20.dp, end = 16.dp, bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -381,7 +579,14 @@ private fun SettingsSectionHeader(title: String, icon: ImageVector) {
         Text(
             text = title,
             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-            color = themeAccent()
+            color = themeAccent(),
+            modifier = Modifier.weight(1f)
+        )
+        Icon(
+            imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+            contentDescription = if (isExpanded) "Collapse" else "Expand",
+            tint = themeAccent(),
+            modifier = Modifier.size(20.dp)
         )
     }
 }
@@ -610,4 +815,3 @@ private fun SettingsActionItem(
         }
     }
 }
-

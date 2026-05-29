@@ -63,6 +63,10 @@ class SettingsViewModel @Inject constructor(
         repository.setVolumeGesture(enabled)
     }
 
+    fun setSeekGesture(enabled: Boolean) = viewModelScope.launch {
+        repository.setSeekGesture(enabled)
+    }
+
     fun setDoubleTapSeek(enabled: Boolean) = viewModelScope.launch {
         repository.setDoubleTapSeek(enabled)
     }
@@ -85,6 +89,14 @@ class SettingsViewModel @Inject constructor(
 
     fun setDarkMode(enabled: Boolean) = viewModelScope.launch {
         repository.setDarkMode(enabled)
+    }
+
+    fun setEqualizerEnabled(enabled: Boolean) = viewModelScope.launch {
+        repository.setEqualizerEnabled(enabled)
+    }
+
+    fun setResumePreference(pref: SettingsRepository.ResumePreference) = viewModelScope.launch {
+        repository.setResumePreference(pref)
     }
 
     fun resetResumePreference() = viewModelScope.launch {
@@ -114,6 +126,42 @@ class SettingsViewModel @Inject constructor(
 
     fun setOrientationMode(mode: SettingsRepository.OrientationMode) = viewModelScope.launch {
         repository.setOrientationMode(mode)
+    }
+
+    fun setSmartEnhanceEnabled(enabled: Boolean) = viewModelScope.launch {
+        repository.setSmartEnhanceEnabled(enabled)
+    }
+
+    fun setHardwareScaling(enabled: Boolean) = viewModelScope.launch {
+        repository.setHardwareScaling(enabled)
+    }
+
+    fun setFasterFullscreen(enabled: Boolean) = viewModelScope.launch {
+        repository.setFasterFullscreen(enabled)
+    }
+
+    fun setSurfaceStabilization(enabled: Boolean) = viewModelScope.launch {
+        repository.setSurfaceStabilization(enabled)
+    }
+
+    fun setAudioBoost(enabled: Boolean) = viewModelScope.launch {
+        repository.setAudioBoost(enabled)
+    }
+
+    fun setSubtitleOpacity(opacity: Float) = viewModelScope.launch {
+        repository.setSubtitleOpacity(opacity)
+    }
+
+    fun setSubtitlePosition(position: Float) = viewModelScope.launch {
+        repository.setSubtitlePosition(position)
+    }
+
+    fun setSubtitleShadowEnabled(enabled: Boolean) = viewModelScope.launch {
+        repository.setSubtitleShadowEnabled(enabled)
+    }
+
+    fun setSubtitleDelay(delayMs: Long) = viewModelScope.launch {
+        repository.setSubtitleDelay(delayMs)
     }
 
     fun setShowOnboarding(enabled: Boolean) = viewModelScope.launch {

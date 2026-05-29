@@ -77,6 +77,9 @@ fun ExternalPlayerScreen(
             
             // Restore orientation when leaving the external player activity
             activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            
+            // Stop external player and save progress immediately on screen dispose
+            viewModel.stopPlayer()
         }
     }
 
@@ -387,6 +390,45 @@ fun ExternalPlayerScreen(
                     view.setCues(cues)
                     view.setFixedTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, settings.subtitleSize)
                     view.alpha = settings.subtitleOpacity
+                    
+                    val systemStyle = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+                        val captioningManager = view.context.getSystemService(android.content.Context.CAPTIONING_SERVICE) as? android.view.accessibility.CaptioningManager
+                        if (captioningManager != null) {
+                            androidx.media3.ui.CaptionStyleCompat.createFromCaptionStyle(captioningManager.userStyle)
+                        } else {
+                            androidx.media3.ui.CaptionStyleCompat.DEFAULT
+                        }
+                    } else {
+                        androidx.media3.ui.CaptionStyleCompat.DEFAULT
+                    }
+                    val fgColor = try {
+                        android.graphics.Color.parseColor(settings.subtitleColor)
+                    } catch (e: Exception) {
+                        systemStyle.foregroundColor
+                    }
+                    val bgColor = if (settings.subtitleBackground) {
+                        if (systemStyle.backgroundColor != android.graphics.Color.TRANSPARENT) {
+                            systemStyle.backgroundColor
+                        } else {
+                            android.graphics.Color.parseColor("#80000000")
+                        }
+                    } else {
+                        android.graphics.Color.TRANSPARENT
+                    }
+                    val edgeType = if (settings.subtitleShadowEnabled) {
+                        if (systemStyle.edgeType != androidx.media3.ui.CaptionStyleCompat.EDGE_TYPE_NONE) systemStyle.edgeType else androidx.media3.ui.CaptionStyleCompat.EDGE_TYPE_OUTLINE
+                    } else {
+                        androidx.media3.ui.CaptionStyleCompat.EDGE_TYPE_NONE
+                    }
+                    val customStyle = androidx.media3.ui.CaptionStyleCompat(
+                        fgColor,
+                        bgColor,
+                        android.graphics.Color.TRANSPARENT,
+                        edgeType,
+                        systemStyle.edgeColor,
+                        systemStyle.typeface
+                    )
+                    view.setStyle(customStyle)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -512,7 +554,7 @@ fun ExternalPlayerScreen(
                 videoFilename = currentMedia?.displayName ?: "Video",
                 videoPath = currentMedia?.path,
                 apiKey = settings.subtitleApiKey,
-                preferredLanguage = settings.subtitleTargetLang,
+                preferredLanguage = settings.subtitleLanguage,
                 onSubtitleSelected = { file: java.io.File, lang: String ->
                     viewModel.loadExternalSubtitle(file, lang)
                     viewModel.showSubtitleSearch(false)

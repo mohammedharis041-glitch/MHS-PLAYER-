@@ -89,7 +89,7 @@ class SettingsRepository @Inject constructor(
         val swipeSensitivity: Float = 1.0f,
         val subtitleSize: Float = 16f,
         val subtitleColor: String = "#FFFFFF",
-        val subtitleBackground: Boolean = true,
+        val subtitleBackground: Boolean = false,
         val playbackSpeed: Float = 1.0f,
         val autoRotate: Boolean = true,
         val pipOnHome: Boolean = true,
@@ -150,7 +150,7 @@ class SettingsRepository @Inject constructor(
                 swipeSensitivity = prefs[Keys.SWIPE_SENSITIVITY] ?: 1.0f,
                 subtitleSize = prefs[Keys.SUBTITLE_SIZE] ?: 16f,
                 subtitleColor = prefs[Keys.SUBTITLE_COLOR] ?: "#FFFFFF",
-                subtitleBackground = prefs[Keys.SUBTITLE_BACKGROUND] ?: true,
+                subtitleBackground = prefs[Keys.SUBTITLE_BACKGROUND] ?: false,
                 playbackSpeed = prefs[Keys.PLAYBACK_SPEED] ?: 1.0f,
                 autoRotate = prefs[Keys.AUTO_ROTATE] ?: true,
                 pipOnHome = prefs[Keys.PIP_ON_HOME] ?: true,
@@ -265,6 +265,10 @@ class SettingsRepository @Inject constructor(
         it[Keys.VOLUME_GESTURE] = enabled
     }
 
+    suspend fun setSeekGesture(enabled: Boolean) = context.dataStore.edit {
+        it[Keys.SEEK_GESTURE] = enabled
+    }
+
     suspend fun setDoubleTapSeek(enabled: Boolean) = context.dataStore.edit {
         it[Keys.DOUBLE_TAP_SEEK] = enabled
     }
@@ -279,6 +283,10 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setShowHidden(show: Boolean) = context.dataStore.edit {
         it[Keys.SHOW_HIDDEN] = show
+    }
+
+    suspend fun setAudioBoost(enabled: Boolean) = context.dataStore.edit {
+        it[Keys.AUDIO_BOOST] = enabled
     }
 
     suspend fun setThumbnailQuality(quality: Int) = context.dataStore.edit {
