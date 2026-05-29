@@ -753,6 +753,14 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
+    fun saveProgressOnMinimize() {
+        val media = currentMedia.value ?: return
+        val position = playerController.getCurrentPosition()
+        if (position > 2000) {
+            playbackManager.saveProgressBlocking(media, position)
+        }
+    }
+
     private var lastMediaId: Long = -1
     private fun observeMediaChanges() {
         viewModelScope.launch {

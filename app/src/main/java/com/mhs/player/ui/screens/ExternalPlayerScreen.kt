@@ -77,6 +77,8 @@ fun ExternalPlayerScreen(
             
             // Restore orientation when leaving the external player activity
             activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            
+            viewModel.saveProgressOnMinimize()
         }
     }
 
