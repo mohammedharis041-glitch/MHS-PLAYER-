@@ -206,7 +206,6 @@ fun PlayerScreen(
         viewModel.playerController.setAutoAdvance(true)
         onDispose {
             viewModel.playerController.setAutoAdvance(false)
-            viewModel.stopPlayer()
         }
     }
 
