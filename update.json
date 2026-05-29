@@ -1,9 +1,9 @@
 {
-  "versionCode": 15,
-  "versionName": "1.1.4",
-  "apkUrl": "https://github.com/mohammedharis041-glitch/MHS-PLAYER-/releases/download/v1.1.4/app-release.apk",
+  "versionCode": 16,
+  "versionName": "1.1.5",
+  "apkUrl": "https://github.com/mohammedharis041-glitch/MHS-PLAYER-/releases/download/v1.1.5/app-release.apk",
   "apkSize": 17245000,
   "mandatory": false,
-  "changelog": "• Add robust 1080p / 10-bit HEVC (x265 / Main10) hardware-to-software auto fallback\n• Ensure seamless playback position and queue recovery during fallback\n• Add manual Hardware (HW) / Software (SW) decoder toggles to controls panel\n• Add real-time Codec Profile and bit-depth telemetry in diagnostics overlays\n• Integrate Playback Diagnostics overlay container inside External Player Screen",
-  "publishedAt": "2026-05-26T17:39:00Z"
+  "changelog": "• Completely redesigned premium Settings Screen into clean, modern categories\n• Strictly fixed resume playback progress saving on player stop for large files and movies\n• Expanded OpenSubtitles search engine supporting 30+ major global languages\n• Added volume/brightness gesture sensitivity sliders, advanced Equalizer, and subtitle shadows",
+  "publishedAt": "2026-05-30T03:17:00Z"
 }
