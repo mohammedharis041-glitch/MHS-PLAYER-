@@ -168,9 +168,31 @@ class SubtitleRepository @Inject constructor(
             .replace(Regex("\\s{2,}"), " ") // collapse multiple spaces
             .trim()
 
+        // 3b. Remove common leading uploader prefixes, brackets, domains, or Telegram handles
+        var finalTitle = cleanTitle
+        
+        // Remove leading text in brackets like [TG], (Tamilmv), etc.
+        finalTitle = finalTitle.replace(Regex("^(?:\\[.*?\\]|\\(.*?\\)|\\{.*?\\})\\s*"), "")
+        
+        // Remove leading Telegram handles like @tgchannel
+        finalTitle = finalTitle.replace(Regex("^@\\w+\\s*"), "")
+        
+        // Remove leading domain names like www.1TamilMV.org or bolly4u.org
+        finalTitle = finalTitle.replace(Regex("^(?:www\\.)?[a-zA-Z0-9\\-]+\\.[a-zA-Z]{2,4}\\b\\s*"), "")
+        
+        // Remove leading uploader or garbage prefixes like abcd, tg, yts, etc., when followed by a separator or space
+        val leadingGarbageRegex = Regex(
+            "^(?:abcd|tg|xyz|yts|yify|kerala|malayalam|tamil|telugu|hindi|english|hq|hd|web|cam|rip|dvd|clean|uncut|original|official|direct|link|shared|by|from|download|org|cool|site)\\b\\s*[\\-\\s_]*",
+            RegexOption.IGNORE_CASE
+        )
+        finalTitle = finalTitle.replace(leadingGarbageRegex, "")
+        
+        // Trim and collapse extra spaces
+        finalTitle = finalTitle.trim().replace(Regex("\\s{2,}"), " ")
+
         // 4. Reconstruct clean query
         val cleanQuery = buildString {
-            append(cleanTitle)
+            append(finalTitle)
             if (yearInfo.isNotEmpty()) {
                 append(" ")
                 append(yearInfo)
@@ -181,7 +203,7 @@ class SubtitleRepository @Inject constructor(
             }
         }.trim().replace(Regex("\\s{2,}"), " ")
 
-        Log.d("MHSPlayer-Subtitles", "Normalization - Raw: '$baseName', Normalized: '$cleanQuery' (Title: '$cleanTitle', Year: '$yearInfo', TV: '$tvInfo')")
+        Log.d("MHSPlayer-Subtitles", "Normalization - Raw: '$baseName', Normalized: '$cleanQuery' (Title: '$finalTitle', Year: '$yearInfo', TV: '$tvInfo')")
         
         // Bypass over-normalization: fall back to raw basename if it strips too aggressively (leaving <3 chars)
         return if (cleanQuery.length < 3) baseName else cleanQuery
