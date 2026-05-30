@@ -633,7 +633,18 @@ class PlayerViewModel @Inject constructor(
     fun getSubtitleTracks() = playerController.getSubtitleTracks()
     fun selectSubtitleTrack(index: Int) = playerController.selectSubtitleTrack(index)
     fun getAudioTracks() = playerController.getAudioTracks()
-    fun selectAudioTrack(index: Int) = playerController.selectAudioTrack(index)
+    fun selectAudioTrack(index: Int) {
+        playerController.selectAudioTrack(index)
+        val media = currentMedia.value ?: return
+        viewModelScope.launch {
+            try {
+                historyDao.updateAudioTrack(media.id, index)
+                Log.d("MHSPlayer-Audio", "Saved audio track index $index for ${media.title}")
+            } catch (e: Exception) {
+                Log.e("MHSPlayer-Audio", "Failed to save audio track index", e)
+            }
+        }
+    }
 
     /** Load a locally downloaded .srt/.ass subtitle file into ExoPlayer with language context */
     fun loadExternalSubtitle(file: java.io.File, lang: String = "en") {
@@ -765,7 +776,10 @@ class PlayerViewModel @Inject constructor(
     private fun observeMediaChanges() {
         viewModelScope.launch {
             currentMedia.collectLatest { media ->
-                if (media == null) return@collectLatest
+                if (media == null) {
+                    lastMediaId = -1
+                    return@collectLatest
+                }
                 if (media.id == lastMediaId) return@collectLatest
                 lastMediaId = media.id
 
@@ -795,6 +809,9 @@ class PlayerViewModel @Inject constructor(
                         if (history.audioDelay != 0L) {
                             _uiState.value = _uiState.value.copy(audioDelayMs = history.audioDelay)
                             playerController.setAudioDelay(history.audioDelay)
+                        }
+                        if (history.audioTrackIndex != -1) {
+                            playerController.pendingAudioTrackIndex = history.audioTrackIndex
                         }
                         val path = history.subtitlePath
                         if (!path.isNullOrBlank()) {

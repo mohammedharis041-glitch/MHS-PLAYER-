@@ -24,7 +24,8 @@ data class PlaybackHistory(
     val subtitleDelay: Long = 0L,
     val subtitleSpeed: Float = 1.0f,
     val subtitlePath: String? = null,
-    val audioDelay: Long = 0L
+    val audioDelay: Long = 0L,
+    val audioTrackIndex: Int = -1
 )
 
 @Entity(

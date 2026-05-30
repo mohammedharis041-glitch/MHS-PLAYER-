@@ -29,6 +29,9 @@ interface HistoryDao {
     @Query("UPDATE playback_history SET subtitlePath = :path WHERE mediaId = :mediaId")
     suspend fun updateSubtitlePath(mediaId: Long, path: String?)
 
+    @Query("UPDATE playback_history SET audioTrackIndex = :trackIndex WHERE mediaId = :mediaId")
+    suspend fun updateAudioTrack(mediaId: Long, trackIndex: Int)
+
     @Query("DELETE FROM playback_history WHERE mediaId = :mediaId")
     suspend fun deleteHistory(mediaId: Long)
 

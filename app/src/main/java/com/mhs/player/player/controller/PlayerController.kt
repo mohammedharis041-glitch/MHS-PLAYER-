@@ -62,6 +62,7 @@ class PlayerController @Inject constructor(
     private var loadSubtitleJob: Job? = null
     private var isManualSubtitleActive: Boolean = false
     private var currentlyActiveSubtitleFile: File? = null
+    var pendingAudioTrackIndex: Int = -1
 
 
     // Media3 (ExoPlayer)
@@ -987,6 +988,16 @@ class PlayerController @Inject constructor(
 
 
     override fun onPlaybackStateChanged(state: Int) { updatePlaybackState() }
+    
+    override fun onTracksChanged(tracks: androidx.media3.common.Tracks) {
+        super.onTracksChanged(tracks)
+        if (pendingAudioTrackIndex != -1) {
+            val targetIndex = pendingAudioTrackIndex
+            pendingAudioTrackIndex = -1
+            selectAudioTrack(targetIndex)
+            Log.d("MHSPlayer-Lifecycle", "onTracksChanged: Restored pending audio track index $targetIndex")
+        }
+    }
     
     override fun onIsPlayingChanged(isPlaying: Boolean) { 
         updatePlaybackState()
