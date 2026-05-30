@@ -137,7 +137,12 @@ fun SubtitleSearchSheet(
     // This ensures switching from Malayalam to English gives fresh English results.
     LaunchedEffect(selectedLang) {
         if (videoFilename.isNotBlank()) {
-            viewModel.autoSearch(videoFilename, videoPath, selectedLang, apiKey)
+            val targetQuery = query.ifBlank { viewModel.state.value.query }
+            if (targetQuery.isNotBlank()) {
+                viewModel.search(targetQuery, videoPath, selectedLang, apiKey)
+            } else {
+                viewModel.autoSearch(videoFilename, videoPath, selectedLang, apiKey)
+            }
         }
     }
 
