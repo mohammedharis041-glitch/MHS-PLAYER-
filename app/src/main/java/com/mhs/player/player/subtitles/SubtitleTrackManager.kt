@@ -1,1 +1,60 @@
-cGFja2FnZSBjb20ubWhzLnBsYXllci5wbGF5ZXIuc3VidGl0bGVzCgppbXBvcnQgYW5kcm9pZC5uZXQuVXJpCmltcG9ydCBrb3RsaW54LmNvcm91dGluZXMuZmxvdy5NdXRhYmxlU3RhdGVGbG93CmltcG9ydCBrb3RsaW54LmNvcm91dGluZXMuZmxvdy5TdGF0ZUZsb3cKaW1wb3J0IGphdmF4LmluamVjdC5JbmplY3QKaW1wb3J0IGphdmF4LmluamVjdC5TaW5nbGV0b24KCi8qKgogKiB2Mi1iZXRhOiBGaXggZm9yIGlzc3VlICMxIC0gRGlzYXBwZWFyaW5nIFN1YnRpdGxlIFRyYWNrcwogKgogKiBQcmV2aW91c2x5IHRhcHBpbmcgIk9mZiIgY2xlYXJlZCB0aGUgdHJhY2suIE5vdyB3ZSBjYWNoZSB0aGUgbGFzdCB0cmFjawogKiBhbmQgb25seSBkaXNhYmxlIHJlbmRlcmluZywga2VlcGluZyBvbmUtdGFwIHJlLWVuYWJsZS4KICovCmRhdGEgY2xhc3MgQ2FjaGVkU3VidGl0bGVUcmFjaygKICAgIHZhbCB1cmk6IFVyaSwKICAgIHZhbCBsYW5ndWFnZTogU3RyaW5nLAogICAgdmFsIGxhYmVsOiBTdHJpbmcsCiAgICB2YWwgaXNPbmxpbmU6IEJvb2xlYW4KKQoKQFNpbmdsZXRvbgpjbGFzcyBTdWJ0aXRsZVRyYWNrTWFuYWdlciBASW5qZWN0IGNvbnN0cnVjdG9yKCkgewoKICAgIHByaXZhdGUgdmFsIF9jYWNoZWRUcmFjayA9IE11dGFibGVTdGF0ZUZsb3c8Q2FjaGVkU3VidGl0bGVUcmFjaz8+KG51bGwpCiAgICB2YWwgY2FjaGVkVHJhY2s6IFN0YXRlRmxvdzxDYWNoZWRTdWJ0aXRsZVRyYWNrPz4gPSBfY2FjaGVkVHJhY2sKCiAgICBwcml2YXRlIHZhbCBfaXNFbmFibGVkID0gTXV0YWJsZVN0YXRlRmxvdyh0cnVlKQogICAgdmFsIGlzRW5hYmxlZDogU3RhdGVGbG93PEJvb2xlYW4+ID0gX2lzRW5hYmxlZAoKICAgIGZ1biBjYWNoZVRyYWNrKHRyYWNrOiBDYWNoZWRTdWJ0aXRsZVRyYWNrKSB7CiAgICAgICAgX2NhY2hlZFRyYWNrLnZhbHVlID0gdHJhY2sKICAgICAgICBfaXNFbmFibGVkLnZhbHVlID0gdHJ1ZQogICAgfQoKICAgIC8qKgogICAgICogRGlzYWJsZSByZW5kZXJpbmcgV0lUSE9VVCBjbGVhcmluZyBjYWNoZS4KICAgICAqIFRoaXMgaXMgdGhlIGZpeDogT2ZmICE9IFJlbW92ZQogICAgICovCiAgICBmdW4gZGlzYWJsZVdpdGhvdXRDbGVhcmluZygpIHsKICAgICAgICBfaXNFbmFibGVkLnZhbHVlID0gZmFsc2UKICAgICAgICAvLyBEbyBOT1QgbnVsbCBfY2FjaGVkVHJhY2sKICAgIH0KCiAgICBmdW4gZW5hYmxlKCkgewogICAgICAgIF9pc0VuYWJsZWQudmFsdWUgPSB0cnVlCiAgICB9CgogICAgZnVuIHRvZ2dsZSgpOiBCb29sZWFuIHsKICAgICAgICBfaXNFbmFibGVkLnZhbHVlID0gIV9pc0VuYWJsZWQudmFsdWUKICAgICAgICByZXR1cm4gX2lzRW5hYmxlZC52YWx1ZQogICAgfQoKICAgIGZ1biBjbGVhcigpIHsKICAgICAgICBfY2FjaGVkVHJhY2sudmFsdWUgPSBudWxsCiAgICAgICAgX2lzRW5hYmxlZC52YWx1ZSA9IHRydWUKICAgIH0KCiAgICBmdW4gaGFzQ2FjaGVkVHJhY2soKTogQm9vbGVhbiA9IF9jYWNoZWRUcmFjay52YWx1ZSAhPSBudWxsCn0K
+package com.mhs.player.player.subtitles
+
+import android.net.Uri
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import javax.inject.Inject
+import javax.inject.Singleton
+
+/**
+ * v2-beta: Fix for issue #1 - Disappearing Subtitle Tracks
+ *
+ * Previously tapping "Off" cleared the track. Now we cache the last track
+ * and only disable rendering, keeping one-tap re-enable.
+ */
+data class CachedSubtitleTrack(
+    val uri: Uri,
+    val language: String,
+    val label: String,
+    val isOnline: Boolean
+)
+
+@Singleton
+class SubtitleTrackManager @Inject constructor() {
+
+    private val _cachedTrack = MutableStateFlow<CachedSubtitleTrack?>(null)
+    val cachedTrack: StateFlow<CachedSubtitleTrack?> = _cachedTrack
+
+    private val _isEnabled = MutableStateFlow(true)
+    val isEnabled: StateFlow<Boolean> = _isEnabled
+
+    fun cacheTrack(track: CachedSubtitleTrack) {
+        _cachedTrack.value = track
+        _isEnabled.value = true
+    }
+
+    /**
+     * Disable rendering WITHOUT clearing cache.
+     * This is the fix: Off != Remove
+     */
+    fun disableWithoutClearing() {
+        _isEnabled.value = false
+        // Do NOT null _cachedTrack
+    }
+
+    fun enable() {
+        _isEnabled.value = true
+    }
+
+    fun toggle(): Boolean {
+        _isEnabled.value = !_isEnabled.value
+        return _isEnabled.value
+    }
+
+    fun clear() {
+        _cachedTrack.value = null
+        _isEnabled.value = true
+    }
+
+    fun hasCachedTrack(): Boolean = _cachedTrack.value != null
+}
