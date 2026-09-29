@@ -1,1 +1,159 @@
-cGFja2FnZSBjb20ubWhzLnBsYXllci5wbGF5ZXIuY29udHJvbHMKCmltcG9ydCBhbmRyb2lkeC5jb21wb3NlLmZvdW5kYXRpb24uYmFja2dyb3VuZAppbXBvcnQgYW5kcm9pZHguY29tcG9zZS5mb3VuZGF0aW9uLmJvcmRlcgppbXBvcnQgYW5kcm9pZHguY29tcG9zZS5mb3VuZGF0aW9uLmNsaWNrYWJsZQppbXBvcnQgYW5kcm9pZHguY29tcG9zZS5mb3VuZGF0aW9uLmxheW91dC4qCmltcG9ydCBhbmRyb2lkeC5jb21wb3NlLmZvdW5kYXRpb24ubGF6eS5MYXp5Um93CmltcG9ydCBhbmRyb2lkeC5jb21wb3NlLmZvdW5kYXRpb24ubGF6eS5pdGVtcwppbXBvcnQgYW5kcm9pZHguY29tcG9zZS5mb3VuZGF0aW9uLnNoYXBlLlJvdW5kZWRDb3JuZXJTaGFwZQppbXBvcnQgYW5kcm9pZHguY29tcG9zZS5tYXRlcmlhbDMuTWF0ZXJpYWxUaGVtZQppbXBvcnQgYW5kcm9pZHguY29tcG9zZS5tYXRlcmlhbDMuVGV4dAppbXBvcnQgYW5kcm9pZHguY29tcG9zZS5ydW50aW1lLkNvbXBvc2FibGUKaW1wb3J0IGFuZHJvaWR4LmNvbXBvc2UudWkuQWxpZ25tZW50CmltcG9ydCBhbmRyb2lkeC5jb21wb3NlLnVpLk1vZGlmaWVyCmltcG9ydCBhbmRyb2lkeC5jb21wb3NlLnVpLmRyYXcuY2xpcAppbXBvcnQgYW5kcm9pZHguY29tcG9zZS51aS5ncmFwaGljcy5Db2xvcgppbXBvcnQgYW5kcm9pZHguY29tcG9zZS51aS50ZXh0LmZvbnQuRm9udFdlaWdodAppbXBvcnQgYW5kcm9pZHguY29tcG9zZS51aS51bml0LmRwCmltcG9ydCBhbmRyb2lkeC5jb21wb3NlLnVpLnVuaXQuc3AKCi8qKgogKiB2Mi1iZXRhOiBGb250IHBpY2tlciBmb3Igc3VidGl0bGVzIChpc3N1ZSAjMikKICoKICogVXNhZ2UgaW4gU3VidGl0bGVTZXR0aW5nc1NoZWV0OgogKiBgYGAKICogU3VidGl0bGVGb250UGlja2VyKAogKiAgIHNlbGVjdGVkRmFtaWx5ID0gc2V0dGluZ3Muc3VidGl0bGVGb250RmFtaWx5LAogKiAgIG9uU2VsZWN0ID0geyB2aWV3TW9kZWwuc2V0U3VidGl0bGVGb250RmFtaWx5KGl0KSB9LAogKiAgIG9uSW1wb3J0ID0geyAvKiBsYXVuY2ggU0FGIGZvciAudHRmLy5vdGYgKi8gfQogKiApCiAqIGBgYAogKi8KQENvbXBvc2FibGUKZnVuIFN1YnRpdGxlRm9udFBpY2tlcigKICAgIHNlbGVjdGVkRmFtaWx5OiBTdHJpbmcsCiAgICBvblNlbGVjdDogKFN0cmluZykgLT4gVW5pdCwKICAgIG9uSW1wb3J0OiAoKSAtPiBVbml0LAogICAgbW9kaWZpZXI6IE1vZGlmaWVyID0gTW9kaWZpZXIKKSB7CiAgICB2YWwgYnVuZGxlZEZvbnRzID0gbGlzdE9mKCJEZWZhdWx0IiwgIkludGVyIiwgIlJvYm90byBDb25kZW5zZWQiLCAiUG9wcGlucyIsICJOb3RvIFNhbnMgTWFsYXlhbGFtIikKCiAgICBDb2x1bW4obW9kaWZpZXIgPSBtb2RpZmllci5maWxsTWF4V2lkdGgoKSkgewogICAgICAgIFRleHQoCiAgICAgICAgICAgICJGT05UIiwKICAgICAgICAgICAgc3R5bGUgPSBNYXRlcmlhbFRoZW1lLnR5cG9ncmFwaHkubGFiZWxMYXJnZS5jb3B5KGxldHRlclNwYWNpbmcgPSAyLnNwKSwKICAgICAgICAgICAgY29sb3IgPSBDb2xvci5XaGl0ZS5jb3B5KDAuNGYpLAogICAgICAgICAgICBtb2RpZmllciA9IE1vZGlmaWVyLnBhZGRpbmcoYm90dG9tID0gOC5kcCkKICAgICAgICApCgogICAgICAgIExhenlSb3coCiAgICAgICAgICAgIGhvcml6b250YWxBcnJhbmdlbWVudCA9IEFycmFuZ2VtZW50LnNwYWNlZEJ5KDguZHApLAogICAgICAgICAgICBtb2RpZmllciA9IE1vZGlmaWVyLmZpbGxNYXhXaWR0aCgpCiAgICAgICAgKSB7CiAgICAgICAgICAgIGl0ZW1zKGJ1bmRsZWRGb250cykgeyBmb250IC0+CiAgICAgICAgICAgICAgICB2YWwgaXNTZWxlY3RlZCA9IGZvbnQgPT0gc2VsZWN0ZWRGYW1pbHkKICAgICAgICAgICAgICAgIEJveCgKICAgICAgICAgICAgICAgICAgICBtb2RpZmllciA9IE1vZGlmaWVyCiAgICAgICAgICAgICAgICAgICAgICAgIC5jbGlwKFJvdW5kZWRDb3JuZXJTaGFwZSgxMi5kcCkpCiAgICAgICAgICAgICAgICAgICAgICAgIC5iYWNrZ3JvdW5kKAogICAgICAgICAgICAgICAgICAgICAgICAgICAgaWYgKGlzU2VsZWN0ZWQpIENvbG9yKDB4RkYwMEU1Q0MpLmNvcHkoMC4xNWYpCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBlbHNlIENvbG9yLldoaXRlLmNvcHkoMC4wNmYpCiAgICAgICAgICAgICAgICAgICAgICAgICkKICAgICAgICAgICAgICAgICAgICAgICAgLmJvcmRlcigKICAgICAgICAgICAgICAgICAgICAgICAgICAgIDEuZHAsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBpZiAoaXNTZWxlY3RlZCkgQ29sb3IoMHhGRjAwRTVDQykuY29weSgwLjRmKQogICAgICAgICAgICAgICAgICAgICAgICAgICAgZWxzZSBDb2xvci5UcmFuc3BhcmVudCwKICAgICAgICAgICAgICAgICAgICAgICAgICAgIFJvdW5kZWRDb3JuZXJTaGFwZSgxMi5kcCkKICAgICAgICAgICAgICAgICAgICAgICAgKQogICAgICAgICAgICAgICAgICAgICAgICAuY2xpY2thYmxlIHsgb25TZWxlY3QoZm9udCkgfQogICAgICAgICAgICAgICAgICAgICAgICAucGFkZGluZyhob3Jpem9udGFsID0gMTQuZHAsIHZlcnRpY2FsID0gMTAuZHApLAogICAgICAgICAgICAgICAgICAgIGNvbnRlbnRBbGlnbm1lbnQgPSBBbGlnbm1lbnQuQ2VudGVyCiAgICAgICAgICAgICAgICApIHsKICAgICAgICAgICAgICAgICAgICBUZXh0KAogICAgICAgICAgICAgICAgICAgICAgICBmb250LAogICAgICAgICAgICAgICAgICAgICAgICBjb2xvciA9IGlmIChpc1NlbGVjdGVkKSBDb2xvci5XaGl0ZSBlbHNlIENvbG9yLldoaXRlLmNvcHkoMC43ZiksCiAgICAgICAgICAgICAgICAgICAgICAgIGZvbnRXZWlnaHQgPSBpZiAoaXNTZWxlY3RlZCkgRm9udFdlaWdodC5Cb2xkIGVsc2UgRm9udFdlaWdodC5Ob3JtYWwsCiAgICAgICAgICAgICAgICAgICAgICAgIGZvbnRTaXplID0gMTQuc3AKICAgICAgICAgICAgICAgICAgICApCiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIGl0ZW0gewogICAgICAgICAgICAgICAgQm94KAogICAgICAgICAgICAgICAgICAgIG1vZGlmaWVyID0gTW9kaWZpZXIKICAgICAgICAgICAgICAgICAgICAgICAgLmNsaXAoUm91bmRlZENvcm5lclNoYXBlKDEyLmRwKSkKICAgICAgICAgICAgICAgICAgICAgICAgLmJhY2tncm91bmQoQ29sb3IuV2hpdGUuY29weSgwLjA0ZikpCiAgICAgICAgICAgICAgICAgICAgICAgIC5ib3JkZXIoMS5kcCwgQ29sb3IuV2hpdGUuY29weSgwLjFmKSwgUm91bmRlZENvcm5lclNoYXBlKDEyLmRwKSkKICAgICAgICAgICAgICAgICAgICAgICAgLmNsaWNrYWJsZSB7IG9uSW1wb3J0KCkgfQogICAgICAgICAgICAgICAgICAgICAgICAucGFkZGluZyhob3Jpem9udGFsID0gMTQuZHAsIHZlcnRpY2FsID0gMTAuZHApLAogICAgICAgICAgICAgICAgICAgIGNvbnRlbnRBbGlnbm1lbnQgPSBBbGlnbm1lbnQuQ2VudGVyCiAgICAgICAgICAgICAgICApIHsKICAgICAgICAgICAgICAgICAgICBUZXh0KCIrIEltcG9ydCAudHRmIiwgY29sb3IgPSBDb2xvci5XaGl0ZS5jb3B5KDAuNmYpLCBmb250U2l6ZSA9IDE0LnNwKQogICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAgICAgICAgfQoKICAgICAgICBTcGFjZXIoTW9kaWZpZXIuaGVpZ2h0KDguZHApKQogICAgICAgIFRleHQoCiAgICAgICAgICAgICJQcmV2aWV3OiBUaGUgcXVpY2sgYnJvd24gZm94IGp1bXBzIG92ZXIgdGhlIGxhenkgZG9nIiwKICAgICAgICAgICAgY29sb3IgPSBDb2xvci5XaGl0ZSwKICAgICAgICAgICAgZm9udFNpemUgPSAxNi5zcCwKICAgICAgICAgICAgbW9kaWZpZXIgPSBNb2RpZmllcgogICAgICAgICAgICAgICAgLmZpbGxNYXhXaWR0aCgpCiAgICAgICAgICAgICAgICAuYmFja2dyb3VuZChDb2xvci5CbGFjay5jb3B5KDAuNjVmKSwgUm91bmRlZENvcm5lclNoYXBlKDYuZHApKQogICAgICAgICAgICAgICAgLnBhZGRpbmcoMTIuZHApCiAgICAgICAgKQogICAgfQp9CgovKioKICogdjItYmV0YTogT2ZmLXRvZ2dsZSB0aGF0IHByZXNlcnZlcyBjYWNoZWQgdHJhY2sgKGZpeCBmb3IgaXNzdWUgIzEpCiAqCiAqIFJlcGxhY2UgZXhpc3RpbmcgIk9mZiIgaGFuZGxpbmc6CiAqIE9MRDogb25TZWxlY3RUcmFjaygtMSkgLT4gY2xlYXJzIHRyYWNrCiAqIE5FVzoKICogYGBgCiAqIGlmICh0cmFja01hbmFnZXIuaGFzQ2FjaGVkVHJhY2soKSAmJiAhdHJhY2tNYW5hZ2VyLmlzRW5hYmxlZC52YWx1ZSkgewogKiAgIC8vIFNob3cgIlN1YnRpdGxlczogT2ZmIOKAlCBbbGFiZWxdIiBjaGlwIHdpdGggUmUtZW5hYmxlIGJ1dHRvbgogKiB9IGVsc2UgewogKiAgIHRyYWNrTWFuYWdlci5kaXNhYmxlV2l0aG91dENsZWFyaW5nKCkKICogICBwbGF5ZXIuc2V0U3VidGl0bGVFbmFibGVkKGZhbHNlKSAvLyBkaXNhYmxlIHJlbmRlcmVyLCBkb24ndCBjbGVhcgogKiB9CiAqIGBgYAogKi8KQENvbXBvc2FibGUKZnVuIFN1YnRpdGxlT2ZmQ2hpcCgKICAgIGNhY2hlZExhYmVsOiBTdHJpbmcsCiAgICBvblJlRW5hYmxlOiAoKSAtPiBVbml0LAogICAgb25EaXNtaXNzOiAoKSAtPiBVbml0LAogICAgbW9kaWZpZXI6IE1vZGlmaWVyID0gTW9kaWZpZXIKKSB7CiAgICBSb3coCiAgICAgICAgbW9kaWZpZXIgPSBtb2RpZmllcgogICAgICAgICAgICAuZmlsbE1heFdpZHRoKCkKICAgICAgICAgICAgLmNsaXAoUm91bmRlZENvcm5lclNoYXBlKDEyLmRwKSkKICAgICAgICAgICAgLmJhY2tncm91bmQoQ29sb3IuV2hpdGUuY29weSgwLjA2ZikpCiAgICAgICAgICAgIC5ib3JkZXIoMS5kcCwgQ29sb3IuV2hpdGUuY29weSgwLjFmKSwgUm91bmRlZENvcm5lclNoYXBlKDEyLmRwKSkKICAgICAgICAgICAgLnBhZGRpbmcoaG9yaXpvbnRhbCA9IDEyLmRwLCB2ZXJ0aWNhbCA9IDEwLmRwKSwKICAgICAgICB2ZXJ0aWNhbEFsaWdubWVudCA9IEFsaWdubWVudC5DZW50ZXJWZXJ0aWNhbGx5LAogICAgICAgIGhvcml6b250YWxBcnJhbmdlbWVudCA9IEFycmFuZ2VtZW50LlNwYWNlQmV0d2VlbgogICAgKSB7CiAgICAgICAgVGV4dCgKICAgICAgICAgICAgIlN1YnRpdGxlczogT2ZmIOKAlCAkY2FjaGVkTGFiZWwiLAogICAgICAgICAgICBjb2xvciA9IENvbG9yLldoaXRlLmNvcHkoMC43ZiksCiAgICAgICAgICAgIGZvbnRTaXplID0gMTQuc3AsCiAgICAgICAgICAgIG1vZGlmaWVyID0gTW9kaWZpZXIud2VpZ2h0KDFmKQogICAgICAgICkKICAgICAgICBUZXh0KAogICAgICAgICAgICAiUmUtZW5hYmxlIiwKICAgICAgICAgICAgY29sb3IgPSBDb2xvcigweEZGMDBFNUNDKSwKICAgICAgICAgICAgZm9udFdlaWdodCA9IEZvbnRXZWlnaHQuQm9sZCwKICAgICAgICAgICAgZm9udFNpemUgPSAxNC5zcCwKICAgICAgICAgICAgbW9kaWZpZXIgPSBNb2RpZmllcgogICAgICAgICAgICAgICAgLmNsaXAoUm91bmRlZENvcm5lclNoYXBlKDguZHApKQogICAgICAgICAgICAgICAgLmNsaWNrYWJsZSB7IG9uUmVFbmFibGUoKSB9CiAgICAgICAgICAgICAgICAucGFkZGluZyg4LmRwKQogICAgICAgICkKICAgIH0KfQo=
+package com.mhs.player.player.controls
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+/**
+ * v2-beta: Font picker for subtitles (issue #2)
+ *
+ * Usage in SubtitleSettingsSheet:
+ * ```
+ * SubtitleFontPicker(
+ *   selectedFamily = settings.subtitleFontFamily,
+ *   onSelect = { viewModel.setSubtitleFontFamily(it) },
+ *   onImport = { /* launch SAF for .ttf/.otf */ }
+ * )
+ * ```
+ */
+@Composable
+fun SubtitleFontPicker(
+    selectedFamily: String,
+    onSelect: (String) -> Unit,
+    onImport: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val bundledFonts = listOf("Default", "Inter", "Roboto Condensed", "Poppins", "Noto Sans Malayalam")
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            "FONT",
+            style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 2.sp),
+            color = Color.White.copy(0.4f),
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            items(bundledFonts) { font ->
+                val isSelected = font == selectedFamily
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            if (isSelected) Color(0xFF00E5CC).copy(0.15f)
+                            else Color.White.copy(0.06f)
+                        )
+                        .border(
+                            1.dp,
+                            if (isSelected) Color(0xFF00E5CC).copy(0.4f)
+                            else Color.Transparent,
+                            RoundedCornerShape(12.dp)
+                        )
+                        .clickable { onSelect(font) }
+                        .padding(horizontal = 14.dp, vertical = 10.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        font,
+                        color = if (isSelected) Color.White else Color.White.copy(0.7f),
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                        fontSize = 14.sp
+                    )
+                }
+            }
+
+            item {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.White.copy(0.04f))
+                        .border(1.dp, Color.White.copy(0.1f), RoundedCornerShape(12.dp))
+                        .clickable { onImport() }
+                        .padding(horizontal = 14.dp, vertical = 10.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("+ Import .ttf", color = Color.White.copy(0.6f), fontSize = 14.sp)
+                }
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+        Text(
+            "Preview: The quick brown fox jumps over the lazy dog",
+            color = Color.White,
+            fontSize = 16.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.Black.copy(0.65f), RoundedCornerShape(6.dp))
+                .padding(12.dp)
+        )
+    }
+}
+
+/**
+ * v2-beta: Off-toggle that preserves cached track (fix for issue #1)
+ *
+ * Replace existing "Off" handling:
+ * OLD: onSelectTrack(-1) -> clears track
+ * NEW:
+ * ```
+ * if (trackManager.hasCachedTrack() && !trackManager.isEnabled.value) {
+ *   // Show "Subtitles: Off — [label]" chip with Re-enable button
+ * } else {
+ *   trackManager.disableWithoutClearing()
+ *   player.setSubtitleEnabled(false) // disable renderer, don't clear
+ * }
+ * ```
+ */
+@Composable
+fun SubtitleOffChip(
+    cachedLabel: String,
+    onReEnable: () -> Unit,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color.White.copy(0.06f))
+            .border(1.dp, Color.White.copy(0.1f), RoundedCornerShape(12.dp))
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            "Subtitles: Off — $cachedLabel",
+            color = Color.White.copy(0.7f),
+            fontSize = 14.sp,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            "Re-enable",
+            color = Color(0xFF00E5CC),
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp,
+            modifier = Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .clickable { onReEnable() }
+                .padding(8.dp)
+        )
+    }
+}
