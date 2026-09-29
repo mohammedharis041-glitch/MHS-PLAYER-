@@ -1,1 +1,41 @@
-IyBNSFMgUGxheWVyIHYyLWJldGEKCkJldGEgYnJhbmNoIGZvciB0aGUgbmV4dCBtYWpvciB1cGRhdGUuIEJhc2U6IHYxLjEuNSAobWFpbiBAIGUzYjllMzApCgojIyBOZXcgZmVhdHVyZXMgaW4gdGhpcyBiZXRhCgojIyMgMS4gU3VidGl0bGUgZml4ZXMKLSBGaXg6IHRhcHBpbmcgIk9mZiIgbm8gbG9uZ2VyIGRlbGV0ZXMgdGhlIGxvYWRlZCBzdWJ0aXRsZSB0cmFjay4gSXQgbm93IGRpc2FibGVzIHJlbmRlcmluZyBidXQga2VlcHMgdGhlIHRyYWNrIGNhY2hlZCB3aXRoIG9uZS10YXAgcmUtZW5hYmxlLgotIFNob3dzIHBlcnNpc3RlbnQgY2hpcDogIlN1YnRpdGxlczogT2ZmIOKAlCBbZmlsZW5hbWVdIgoKIyMjIDIuIFN1YnRpdGxlIGZvbnQgc2VsZWN0aW9uIChjb3ZlcnMgaXNzdWUgIzIpCi0gTmV3IFNldHRpbmdzIOKGkiBTdWJ0aXRsZXMg4oaSIEFwcGVhcmFuY2Ugc2NyZWVuIHdpdGggbGl2ZSBwcmV2aWV3Ci0gNCBidW5kbGVkIGZvbnRzOiBJbnRlciwgUm9ib3RvIENvbmRlbnNlZCwgUG9wcGlucywgTm90byBTYW5zIE1hbGF5YWxhbQotIEltcG9ydCBjdXN0b20gLnR0Zi8ub3RmIHZpYSBTQUYsIHN0b3JlZCBpbiBhcHAtcHJpdmF0ZSBmb250cy8KLSBPcHRpb25zOiBzaXplLCBib2xkLCBjb2xvdXIsIGVkZ2Ugc3R5bGUsIGJhY2tncm91bmQgb3BhY2l0eQoKIyMjIDMuIFBlci12aWRlbyBzZXR0aW5ncyBtZW1vcnkKLSBOZXcgUm9vbSBlbnRpdHkgYFZpZGVvU2V0dGluZ3ModmlkZW9JZCwgYXVkaW9UcmFja0luZGV4LCBzdWJ0aXRsZVRyYWNrSWQsIHBsYXliYWNrU3BlZWQsIHN1YnRpdGxlRW5hYmxlZClgCi0gQXV0by1zYXZlIG9uIHBhdXNlIC8gdHJhY2sgY2hhbmdlLCByZXN0b3JlIG9uIG9wZW4KLSAiUmVzZXQgZm9yIHRoaXMgdmlkZW8iIGluIG92ZXJmbG93IG1lbnUKCiMjIyA0LiBTbGVlcCB0aW1lcgotIDE1LzMwLzYwLzkwIG1pbiArIGN1c3RvbQotIEZhZGUtb3V0IHZvbHVtZSBpbiBsYXN0IDMwcwotIEVuZCBhY3Rpb246IHBhdXNlIChjb25maWd1cmFibGUgdG8gc3RvcC1hbmQtZXhpdCkKLSBOb3RpZmljYXRpb24gd2l0aCBjYW5jZWwgKyByZW1haW5pbmcgdGltZSBjaGlwIGluIHBsYXllcgoKIyMjIDUuIFBvbGlzaAotIE1pbmlwbGF5ZXIgc3RhYmlsaXR5IGZvbGxvdy11cAotIENvbnRpbnVlIFdhdGNoaW5nIGltcHJvdmVtZW50cwotIER5bmFtaWMgY29sb3VyIHRoZW1pbmcgcHJlcAoKIyMgVGVzdGluZwotIFsgXSBTdWJ0aXRsZSBPZmYg4oaSIHRyYWNrIHBlcnNpc3RzCi0gWyBdIEZvbnQgcGlja2VyIGFwcGxpZXMgbGl2ZSwgc3Vydml2ZXMgcmVzdGFydAotIFsgXSBJbXBvcnRlZCAudHRmIHdvcmtzCi0gWyBdIFBlci12aWRlbyBzZXR0aW5ncyByZXN0b3JlIGNvcnJlY3RseQotIFsgXSBTbGVlcCB0aW1lciBwYXVzZXMgYXQgMCwgd29ya3MgaW4gYmFja2dyb3VuZAoKIyMgQnJhbmNoCmB2Mi1iZXRhYCDigJQgbWVyZ2UgdG8gbWFpbiBvbmx5IGFmdGVyIGJldGEgdGVzdGluZy4K
+# MHS Player v2-beta
+
+Beta branch for the next major update. Base: v1.1.5 (main @ e3b9e30)
+
+## New features in this beta
+
+### 1. Subtitle fixes
+- Fix: tapping "Off" no longer deletes the loaded subtitle track. It now disables rendering but keeps the track cached with one-tap re-enable.
+- Shows persistent chip: "Subtitles: Off — [filename]"
+
+### 2. Subtitle font selection (covers issue #2)
+- New Settings → Subtitles → Appearance screen with live preview
+- 4 bundled fonts: Inter, Roboto Condensed, Poppins, Noto Sans Malayalam
+- Import custom .ttf/.otf via SAF, stored in app-private fonts/
+- Options: size, bold, colour, edge style, background opacity
+
+### 3. Per-video settings memory
+- New Room entity `VideoSettings(videoId, audioTrackIndex, subtitleTrackId, playbackSpeed, subtitleEnabled)`
+- Auto-save on pause / track change, restore on open
+- "Reset for this video" in overflow menu
+
+### 4. Sleep timer
+- 15/30/60/90 min + custom
+- Fade-out volume in last 30s
+- End action: pause (configurable to stop-and-exit)
+- Notification with cancel + remaining time chip in player
+
+### 5. Polish
+- Miniplayer stability follow-up
+- Continue Watching improvements
+- Dynamic colour theming prep
+
+## Testing
+- [ ] Subtitle Off → track persists
+- [ ] Font picker applies live, survives restart
+- [ ] Imported .ttf works
+- [ ] Per-video settings restore correctly
+- [ ] Sleep timer pauses at 0, works in background
+
+## Branch
+`v2-beta` — merge to main only after beta testing.
