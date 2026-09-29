@@ -1,1 +1,76 @@
-cGFja2FnZSBjb20ubWhzLnBsYXllci5wbGF5ZXIuc2VydmljZQoKaW1wb3J0IGtvdGxpbnguY29yb3V0aW5lcy4qCmltcG9ydCBrb3RsaW54LmNvcm91dGluZXMuZmxvdy5NdXRhYmxlU3RhdGVGbG93CmltcG9ydCBrb3RsaW54LmNvcm91dGluZXMuZmxvdy5TdGF0ZUZsb3cKaW1wb3J0IGphdmF4LmluamVjdC5JbmplY3QKaW1wb3J0IGphdmF4LmluamVjdC5TaW5nbGV0b24KCi8qKgogKiB2Mi1iZXRhOiBTbGVlcCB0aW1lciB3aXRoIGZhZGUtb3V0LgogKiBFbmQgYWN0aW9uczogUEFVU0Ugb3IgU1RPUF9BTkRfRVhJVAogKi8KQFNpbmdsZXRvbgpjbGFzcyBTbGVlcFRpbWVyTWFuYWdlciBASW5qZWN0IGNvbnN0cnVjdG9yKCkgewogICAgcHJpdmF0ZSB2YXIgam9iOiBKb2I/ID0gbnVsbAogICAgcHJpdmF0ZSB2YWwgc2NvcGUgPSBDb3JvdXRpbmVTY29wZShTdXBlcnZpc29ySm9iKCkgKyBEaXNwYXRjaGVycy5NYWluKQoKICAgIHByaXZhdGUgdmFsIF9yZW1haW5pbmdNaW51dGVzID0gTXV0YWJsZVN0YXRlRmxvdygwKQogICAgdmFsIHJlbWFpbmluZ01pbnV0ZXM6IFN0YXRlRmxvdzxJbnQ+ID0gX3JlbWFpbmluZ01pbnV0ZXMKCiAgICBwcml2YXRlIHZhbCBfaXNBY3RpdmUgPSBNdXRhYmxlU3RhdGVGbG93KGZhbHNlKQogICAgdmFsIGlzQWN0aXZlOiBTdGF0ZUZsb3c8Qm9vbGVhbj4gPSBfaXNBY3RpdmUKCiAgICAvKioKICAgICAqIFN0YXJ0IHRpbWVyLiBvblRpY2sgY2FsbGVkIGVhY2ggbWludXRlLCBvbkZhZGVTdGFydCBjYWxsZWQgMzBzIGJlZm9yZSBlbmQsCiAgICAgKiBvbkZpbmlzaCBjYWxsZWQgYXQgMC4KICAgICAqLwogICAgZnVuIHN0YXJ0KAogICAgICAgIG1pbnV0ZXM6IEludCwKICAgICAgICBvblRpY2s6IChyZW1haW5pbmc6IEludCkgLT4gVW5pdCA9IHt9LAogICAgICAgIG9uRmFkZVN0YXJ0OiAoKSAtPiBVbml0ID0ge30sCiAgICAgICAgb25GaW5pc2g6IChlbmRBY3Rpb246IFN0cmluZykgLT4gVW5pdCA9IHt9CiAgICApIHsKICAgICAgICBjYW5jZWwoKQogICAgICAgIGlmIChtaW51dGVzIDw9IDApIHJldHVybgogICAgICAgIF9pc0FjdGl2ZS52YWx1ZSA9IHRydWUKICAgICAgICBfcmVtYWluaW5nTWludXRlcy52YWx1ZSA9IG1pbnV0ZXMKCiAgICAgICAgam9iID0gc2NvcGUubGF1bmNoIHsKICAgICAgICAgICAgdmFyIHJlbWFpbmluZyA9IG1pbnV0ZXMKICAgICAgICAgICAgd2hpbGUgKHJlbWFpbmluZyA+IDAgJiYgaXNBY3RpdmUpIHsKICAgICAgICAgICAgICAgIGRlbGF5KDYwXzAwMEwpCiAgICAgICAgICAgICAgICByZW1haW5pbmctLQogICAgICAgICAgICAgICAgX3JlbWFpbmluZ01pbnV0ZXMudmFsdWUgPSByZW1haW5pbmcKICAgICAgICAgICAgICAgIG9uVGljayhyZW1haW5pbmcpCgogICAgICAgICAgICAgICAgLy8gRmFkZS1vdXQgaW4gbGFzdCBtaW51dGU6IHRyaWdnZXIgMzBzIGJlZm9yZSBlbmQKICAgICAgICAgICAgICAgIGlmIChyZW1haW5pbmcgPT0gMCkgewogICAgICAgICAgICAgICAgICAgIC8vIEZpbmFsIDMwcyBmYWRlIGhhbmRsZWQgYnkgY2FsbGVyIHZpYSBvbkZhZGVTdGFydAogICAgICAgICAgICAgICAgICAgIC8vIFdlIGRvIGEgc2hvcnQgMzBzIHdhaXQgd2l0aCBmYWRlIGNhbGxiYWNrCiAgICAgICAgICAgICAgICAgICAgLy8gU2ltcGxpZmllZDogY2FsbCBvbkZhZGVTdGFydCB0aGVuIHdhaXQgMzBzIGlzIGhhbmRsZWQgZXh0ZXJuYWxseQogICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAgICAgICAgICAgIGlmIChfaXNBY3RpdmUudmFsdWUpIHsKICAgICAgICAgICAgICAgIF9pc0FjdGl2ZS52YWx1ZSA9IGZhbHNlCiAgICAgICAgICAgICAgICBfcmVtYWluaW5nTWludXRlcy52YWx1ZSA9IDAKICAgICAgICAgICAgICAgIG9uRmluaXNoKCJQQVVTRSIpCiAgICAgICAgICAgIH0KICAgICAgICB9CgogICAgICAgIC8vIFNjaGVkdWxlIGZhZGUgMzBzIGJlZm9yZSBlbmQKICAgICAgICBzY29wZS5sYXVuY2ggewogICAgICAgICAgICBkZWxheSgobWludXRlcyAqIDYwXzAwMEwgLSAzMF8wMDBMKS5jb2VyY2VBdExlYXN0KDBMKSkKICAgICAgICAgICAgaWYgKF9pc0FjdGl2ZS52YWx1ZSkgb25GYWRlU3RhcnQoKQogICAgICAgIH0KICAgIH0KCiAgICBmdW4gY2FuY2VsKCkgewogICAgICAgIGpvYj8uY2FuY2VsKCkKICAgICAgICBqb2IgPSBudWxsCiAgICAgICAgX2lzQWN0aXZlLnZhbHVlID0gZmFsc2UKICAgICAgICBfcmVtYWluaW5nTWludXRlcy52YWx1ZSA9IDAKICAgIH0KCiAgICBmdW4gZ2V0UmVtYWluaW5nTWludXRlcygpOiBJbnQgPSBfcmVtYWluaW5nTWludXRlcy52YWx1ZQp9Cg==
+package com.mhs.player.player.service
+
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import javax.inject.Inject
+import javax.inject.Singleton
+
+/**
+ * v2-beta: Sleep timer with fade-out.
+ * End actions: PAUSE or STOP_AND_EXIT
+ */
+@Singleton
+class SleepTimerManager @Inject constructor() {
+    private var job: Job? = null
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
+    private val _remainingMinutes = MutableStateFlow(0)
+    val remainingMinutes: StateFlow<Int> = _remainingMinutes
+
+    private val _isActive = MutableStateFlow(false)
+    val isActive: StateFlow<Boolean> = _isActive
+
+    /**
+     * Start timer. onTick called each minute, onFadeStart called 30s before end,
+     * onFinish called at 0.
+     */
+    fun start(
+        minutes: Int,
+        onTick: (remaining: Int) -> Unit = {},
+        onFadeStart: () -> Unit = {},
+        onFinish: (endAction: String) -> Unit = {}
+    ) {
+        cancel()
+        if (minutes <= 0) return
+        _isActive.value = true
+        _remainingMinutes.value = minutes
+
+        job = scope.launch {
+            var remaining = minutes
+            while (remaining > 0 && isActive) {
+                delay(60_000L)
+                remaining--
+                _remainingMinutes.value = remaining
+                onTick(remaining)
+
+                // Fade-out in last minute: trigger 30s before end
+                if (remaining == 0) {
+                    // Final 30s fade handled by caller via onFadeStart
+                    // We do a short 30s wait with fade callback
+                    // Simplified: call onFadeStart then wait 30s is handled externally
+                }
+            }
+            if (_isActive.value) {
+                _isActive.value = false
+                _remainingMinutes.value = 0
+                onFinish("PAUSE")
+            }
+        }
+
+        // Schedule fade 30s before end
+        scope.launch {
+            delay((minutes * 60_000L - 30_000L).coerceAtLeast(0L))
+            if (_isActive.value) onFadeStart()
+        }
+    }
+
+    fun cancel() {
+        job?.cancel()
+        job = null
+        _isActive.value = false
+        _remainingMinutes.value = 0
+    }
+
+    fun getRemainingMinutes(): Int = _remainingMinutes.value
+}
