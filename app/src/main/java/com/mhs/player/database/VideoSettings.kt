@@ -1,1 +1,18 @@
-cGFja2FnZSBjb20ubWhzLnBsYXllci5kYXRhYmFzZQoKaW1wb3J0IGFuZHJvaWR4LnJvb20uRW50aXR5CmltcG9ydCBhbmRyb2lkeC5yb29tLlByaW1hcnlLZXkKCi8qKgogKiB2Mi1iZXRhOiBQZXItdmlkZW8gc2V0dGluZ3MgbWVtb3J5CiAqIFJlbWVtYmVycyBhdWRpbyB0cmFjaywgc3VidGl0bGUsIHNwZWVkIHBlciB2aWRlbwogKi8KQEVudGl0eSh0YWJsZU5hbWUgPSAidmlkZW9fc2V0dGluZ3MiKQpkYXRhIGNsYXNzIFZpZGVvU2V0dGluZ3MoCiAgICBAUHJpbWFyeUtleSB2YWwgdmlkZW9JZDogU3RyaW5nLCAvLyBtZWRpYSBVUkkgaGFzaCBvciBwYXRoCiAgICB2YWwgYXVkaW9UcmFja0luZGV4OiBJbnQgPSAtMSwKICAgIHZhbCBzdWJ0aXRsZVRyYWNrSWQ6IFN0cmluZz8gPSBudWxsLAogICAgdmFsIHN1YnRpdGxlRW5hYmxlZDogQm9vbGVhbiA9IHRydWUsCiAgICB2YWwgcGxheWJhY2tTcGVlZDogRmxvYXQgPSAxLjBmLAogICAgdmFsIGxhc3RVcGRhdGVkOiBMb25nID0gU3lzdGVtLmN1cnJlbnRUaW1lTWlsbGlzKCkKKQo=
+package com.mhs.player.database
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+/**
+ * v2-beta: Per-video settings memory
+ * Remembers audio track, subtitle, speed per video
+ */
+@Entity(tableName = "video_settings")
+data class VideoSettings(
+    @PrimaryKey val videoId: String, // media URI hash or path
+    val audioTrackIndex: Int = -1,
+    val subtitleTrackId: String? = null,
+    val subtitleEnabled: Boolean = true,
+    val playbackSpeed: Float = 1.0f,
+    val lastUpdated: Long = System.currentTimeMillis()
+)
