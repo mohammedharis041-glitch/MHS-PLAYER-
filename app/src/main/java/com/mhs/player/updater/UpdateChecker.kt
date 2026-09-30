@@ -50,8 +50,8 @@ class UpdateChecker @Inject constructor(
             }
         }
 
-        // ── 2. Save timestamp AFTER confirming we will actually fetch ──────
-        repository.preferences.setLastCheckedTimestamp(now)
+        // ── 2. Fetch manifest first ──────────────────────────────────────
+        // (timestamp is only saved after successful fetch, so failures retry soon)
 
         // ── 3. Local version info ──────────────────────────────────────────
         val localVersionCode = BuildConfig.VERSION_CODE
@@ -67,6 +67,9 @@ class UpdateChecker @Inject constructor(
             Log.w(TAG, "Unable to check for updates: manifest was null or fetch failed")
             return UpdateResult(hasUpdate = false)
         }
+        
+        // Save timestamp only after successful fetch
+        repository.preferences.setLastCheckedTimestamp(now)
 
         // Print manifest JSON to logs
         try {
