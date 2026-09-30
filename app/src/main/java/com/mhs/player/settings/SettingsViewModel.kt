@@ -91,6 +91,14 @@ class SettingsViewModel @Inject constructor(
         repository.setDarkMode(enabled)
     }
 
+    fun setThemePreset(preset: String) = viewModelScope.launch {
+        repository.setThemePreset(preset)
+    }
+
+    fun setAccentColor(colorHex: String) = viewModelScope.launch {
+        repository.setAccentColor(colorHex)
+    }
+
     fun setEqualizerEnabled(enabled: Boolean) = viewModelScope.launch {
         repository.setEqualizerEnabled(enabled)
     }
