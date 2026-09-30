@@ -43,7 +43,13 @@ class ApkDownloader @Inject constructor(
         // Cancel any existing download first
         cancelDownload()
 
-        val destinationFile = File(context.getExternalFilesDir(null), fileName)
+        val externalDir = context.getExternalFilesDir(null)
+        if (externalDir == null) {
+            _downloadState.value = DownloadState.Error("Storage not available")
+            return downloadStateFlow
+        }
+
+        val destinationFile = File(externalDir, fileName)
         if (destinationFile.exists()) {
             destinationFile.delete()
         }
@@ -59,7 +65,12 @@ class ApkDownloader @Inject constructor(
             addRequestHeader("User-Agent", "MHSPlayer-Updater")
         }
 
-        val downloadId = downloadManager.enqueue(request)
+        val downloadId = try {
+            downloadManager.enqueue(request)
+        } catch (e: Exception) {
+            _downloadState.value = DownloadState.Error("Download failed to start: ${e.message}")
+            return downloadStateFlow
+        }
         saveDownloadId(downloadId)
 
         // Reset speed calculators
@@ -160,8 +171,14 @@ class ApkDownloader @Inject constructor(
             DownloadManager.STATUS_SUCCESSFUL -> {
                 val fileName = getSavedFileName() ?: "MHSPlayer-update.apk"
                 val file = File(context.getExternalFilesDir(null), fileName)
-                return if (file.exists()) {
-                    DownloadState.Success(file.absolutePath)
+                return if (file.exists() && file.length() > 0) {
+                    // Verify it's a valid APK by checking ZIP header (APKs are ZIP files)
+                    if (isValidApkFile(file)) {
+                        DownloadState.Success(file.absolutePath)
+                    } else {
+                        file.delete()
+                        DownloadState.Error("Downloaded file is corrupted. Please try again.")
+                    }
                 } else {
                     DownloadState.Error("Downloaded file not found")
                 }
@@ -231,6 +248,23 @@ class ApkDownloader @Inject constructor(
             DownloadManager.ERROR_UNHANDLED_HTTP_CODE -> "Unhandled HTTP response"
             DownloadManager.ERROR_UNKNOWN -> "Unknown download error"
             else -> "Download failed (Code: $reason)"
+        }
+    }
+
+    /**
+     * Verifies downloaded file is a valid APK by checking ZIP magic bytes.
+     * APKs are ZIP archives, so they must start with PK\x03\x04.
+     */
+    private fun isValidApkFile(file: File): Boolean {
+        return try {
+            if (file.length() < 4) return false
+            file.inputStream().use { stream ->
+                val header = ByteArray(4)
+                val read = stream.read(header)
+                read == 4 && header[0] == 0x50.toByte() && header[1] == 0x4B.toByte()
+            }
+        } catch (e: Exception) {
+            false
         }
     }
 }
