@@ -103,7 +103,11 @@ class MainActivity : ComponentActivity() {
                     val downloadState by updateViewModel.downloadState.collectAsStateWithLifecycle()
 
                     LaunchedEffect(Unit) {
-                        updateViewModel.checkForUpdates(isManual = false)
+                        // Only auto-check if user hasn't disabled it
+                        val autoCheck = updateViewModel.updaterSettings.value.autoCheck
+                        if (autoCheck) {
+                            updateViewModel.checkForUpdates(isManual = false)
+                        }
                     }
 
                     AppNavigation(
