@@ -11,6 +11,8 @@ import javax.inject.Singleton
 
 private const val TAG = "MHSUpdater-Repo"
 private const val MANIFEST_URL = "https://raw.githubusercontent.com/mohammedharis041-glitch/MHS-PLAYER-/main/update.json"
+private const val MAX_RETRIES = 3
+private const val RETRY_BASE_DELAY_MS = 2000L
 
 @Singleton
 class UpdateRepository @Inject constructor(
@@ -22,36 +24,62 @@ class UpdateRepository @Inject constructor(
     /**
      * Fetches the latest update manifest from the raw GitHub JSON URL.
      * Lightweight, no authentication, bypasses rate limiting completely.
+     * Includes exponential backoff retry for transient network failures.
      */
     suspend fun getLatestUpdate(channel: String = "stable"): UpdateManifest? = withContext(Dispatchers.IO) {
-        try {
-            val cacheBusterUrl = "$MANIFEST_URL?t=${System.currentTimeMillis()}"
-            Log.d(TAG, "Fetching update manifest from URL: $cacheBusterUrl")
+        var lastError: Exception? = null
+        
+        for (attempt in 1..MAX_RETRIES) {
+            try {
+                val cacheBusterUrl = "$MANIFEST_URL?t=${System.currentTimeMillis()}"
+                Log.d(TAG, "Fetching update manifest (attempt $attempt/$MAX_RETRIES): $cacheBusterUrl")
 
-            val response = gitHubApi.getUpdateManifest(cacheBusterUrl)
-            val finalUrl = response.raw().request.url
-            Log.d(TAG, "Final API URL: $finalUrl")
-            Log.d(TAG, "Response Code: HTTP ${response.code()}")
+                val response = gitHubApi.getUpdateManifest(cacheBusterUrl)
+                val finalUrl = response.raw().request.url
+                Log.d(TAG, "Final API URL: $finalUrl")
+                Log.d(TAG, "Response Code: HTTP ${response.code()}")
 
-            if (response.isSuccessful) {
-                val manifest = response.body()
-                if (manifest != null) {
-                    Log.d(TAG, "Manifest fetched successfully:")
-                    Log.d(TAG, "  versionCode = ${manifest.versionCode}")
-                    Log.d(TAG, "  versionName = ${manifest.versionName}")
-                    Log.d(TAG, "  apkUrl      = ${manifest.apkUrl}")
-                    Log.d(TAG, "  mandatory   = ${manifest.mandatory}")
-                    Log.d(TAG, "  changelog   = ${manifest.changelog}")
-                    return@withContext manifest
+                if (response.isSuccessful) {
+                    val manifest = response.body()
+                    if (manifest != null) {
+                        // Validate manifest has required fields
+                        if (manifest.versionCode <= 0 || manifest.apkUrl.isNullOrBlank()) {
+                            Log.w(TAG, "Manifest missing required fields (versionCode=${manifest.versionCode}, apkUrl present=${!manifest.apkUrl.isNullOrBlank()})")
+                            return@withContext null
+                        }
+                        Log.d(TAG, "Manifest fetched successfully:")
+                        Log.d(TAG, "  versionCode = ${manifest.versionCode}")
+                        Log.d(TAG, "  versionName = ${manifest.versionName}")
+                        Log.d(TAG, "  apkUrl      = ${manifest.apkUrl}")
+                        Log.d(TAG, "  mandatory   = ${manifest.mandatory}")
+                        Log.d(TAG, "  changelog   = ${manifest.changelog}")
+                        return@withContext manifest
+                    } else {
+                        Log.w(TAG, "Manifest was empty/null despite HTTP 200")
+                    }
+                } else if (response.code() in 500..599) {
+                    // Server error - retryable
+                    Log.w(TAG, "Server error HTTP ${response.code()}, will retry")
+                    lastError = Exception("Server error: HTTP ${response.code()}")
                 } else {
-                    Log.w(TAG, "Manifest was empty/null despite HTTP 200")
+                    // Client error - not retryable
+                    Log.e(TAG, "Failed to fetch manifest: HTTP ${response.code()} ${response.message()}")
+                    return@withContext null
                 }
-            } else {
-                Log.e(TAG, "Failed to fetch manifest: HTTP ${response.code()} ${response.message()}")
+            } catch (e: Exception) {
+                Log.w(TAG, "Attempt $attempt failed: ${e.javaClass.simpleName}: ${e.message}")
+                lastError = e
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "Exception fetching manifest: ${e.javaClass.simpleName}: ${e.message}", e)
+            
+            // Exponential backoff before retry (except after last attempt)
+            if (attempt < MAX_RETRIES) {
+                val delayMs = RETRY_BASE_DELAY_MS * (1L shl (attempt - 1))
+                Log.d(TAG, "Retrying in ${delayMs}ms...")
+                kotlinx.coroutines.delay(delayMs)
+            }
         }
+        
+        Log.e(TAG, "All $MAX_RETRIES attempts failed. Last error: ${lastError?.message}")
         return@withContext null
     }
 }
