@@ -31,6 +31,8 @@ class SettingsRepository @Inject constructor(
         val PIP_ON_HOME = booleanPreferencesKey("pip_on_home")
         val REMEMBER_POSITION = booleanPreferencesKey("remember_position")
         val DARK_MODE = booleanPreferencesKey("dark_mode")
+        val THEME_PRESET = stringPreferencesKey("theme_preset")
+        val ACCENT_COLOR = stringPreferencesKey("accent_color")
         val HARDWARE_DECODING = booleanPreferencesKey("hardware_decoding")
         val BRIGHTNESS_GESTURE = booleanPreferencesKey("brightness_gesture")
         val VOLUME_GESTURE = booleanPreferencesKey("volume_gesture")
@@ -75,6 +77,16 @@ class SettingsRepository @Inject constructor(
         val SMART_ENHANCE_COLOR_BOOST = floatPreferencesKey("smart_enhance_color_boost")
         val SMART_ENHANCE_NOISE_REDUCTION = floatPreferencesKey("smart_enhance_noise_reduction")
         val SMART_ENHANCE_ADAPTIVE = booleanPreferencesKey("smart_enhance_adaptive")
+        // v2-beta: subtitle font selection (issue #2)
+        val SUBTITLE_FONT_FAMILY = stringPreferencesKey("subtitle_font_family")
+        val SUBTITLE_FONT_PATH = stringPreferencesKey("subtitle_font_path")
+        val SUBTITLE_BOLD = booleanPreferencesKey("subtitle_bold")
+        val SUBTITLE_EDGE_STYLE = stringPreferencesKey("subtitle_edge_style")
+        // v2-beta: sleep timer
+        val SLEEP_TIMER_MINUTES = intPreferencesKey("sleep_timer_minutes")
+        val SLEEP_TIMER_END_ACTION = stringPreferencesKey("sleep_timer_end_action")
+        // v2-beta: per-video settings memory
+        val PER_VIDEO_SETTINGS_ENABLED = booleanPreferencesKey("per_video_settings_enabled")
     }
 
     /** Controls what happens when re-opening a partially watched video. */
@@ -95,6 +107,8 @@ class SettingsRepository @Inject constructor(
         val pipOnHome: Boolean = true,
         val rememberPosition: Boolean = true,
         val darkMode: Boolean = true,
+        val themePreset: String = "AMOLED",
+        val accentColor: String = "#5046E5",
         val hardwareDecoding: Boolean = true,
         val brightnessGesture: Boolean = true,
         val volumeGesture: Boolean = true,
@@ -137,7 +151,15 @@ class SettingsRepository @Inject constructor(
         val smartEnhanceContrast: Float = 0.3f,
         val smartEnhanceColorBoost: Float = 0.3f,
         val smartEnhanceNoiseReduction: Float = 0.4f,
-        val smartEnhanceAdaptive: Boolean = true
+        val smartEnhanceAdaptive: Boolean = true,
+        // v2-beta
+        val subtitleFontFamily: String = "Default",
+        val subtitleFontPath: String = "",
+        val subtitleBold: Boolean = false,
+        val subtitleEdgeStyle: String = "Outline",
+        val sleepTimerMinutes: Int = 0,
+        val sleepTimerEndAction: String = "PAUSE",
+        val perVideoSettingsEnabled: Boolean = true
     )
 
     val settings: Flow<AppSettings> = context.dataStore.data
@@ -156,6 +178,8 @@ class SettingsRepository @Inject constructor(
                 pipOnHome = prefs[Keys.PIP_ON_HOME] ?: true,
                 rememberPosition = prefs[Keys.REMEMBER_POSITION] ?: true,
                 darkMode = prefs[Keys.DARK_MODE] ?: true,
+                themePreset = prefs[Keys.THEME_PRESET] ?: "AMOLED",
+                accentColor = prefs[Keys.ACCENT_COLOR] ?: "#5046E5",
                 hardwareDecoding = prefs[Keys.HARDWARE_DECODING] ?: true,
                 brightnessGesture = prefs[Keys.BRIGHTNESS_GESTURE] ?: true,
                 volumeGesture = prefs[Keys.VOLUME_GESTURE] ?: true,
@@ -213,7 +237,14 @@ class SettingsRepository @Inject constructor(
                 smartEnhanceContrast = prefs[Keys.SMART_ENHANCE_CONTRAST] ?: 0.3f,
                 smartEnhanceColorBoost = prefs[Keys.SMART_ENHANCE_COLOR_BOOST] ?: 0.3f,
                 smartEnhanceNoiseReduction = prefs[Keys.SMART_ENHANCE_NOISE_REDUCTION] ?: 0.4f,
-                smartEnhanceAdaptive = prefs[Keys.SMART_ENHANCE_ADAPTIVE] ?: true
+                smartEnhanceAdaptive = prefs[Keys.SMART_ENHANCE_ADAPTIVE] ?: true,
+                subtitleFontFamily = prefs[Keys.SUBTITLE_FONT_FAMILY] ?: "Default",
+                subtitleFontPath = prefs[Keys.SUBTITLE_FONT_PATH] ?: "",
+                subtitleBold = prefs[Keys.SUBTITLE_BOLD] ?: false,
+                subtitleEdgeStyle = prefs[Keys.SUBTITLE_EDGE_STYLE] ?: "Outline",
+                sleepTimerMinutes = prefs[Keys.SLEEP_TIMER_MINUTES] ?: 0,
+                sleepTimerEndAction = prefs[Keys.SLEEP_TIMER_END_ACTION] ?: "PAUSE",
+                perVideoSettingsEnabled = prefs[Keys.PER_VIDEO_SETTINGS_ENABLED] ?: true
             )
         }
 
@@ -299,6 +330,14 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setDarkMode(enabled: Boolean) = context.dataStore.edit {
         it[Keys.DARK_MODE] = enabled
+    }
+
+    suspend fun setThemePreset(preset: String) = context.dataStore.edit {
+        it[Keys.THEME_PRESET] = preset
+    }
+
+    suspend fun setAccentColor(colorHex: String) = context.dataStore.edit {
+        it[Keys.ACCENT_COLOR] = colorHex
     }
 
     suspend fun setResumePreference(pref: ResumePreference) = context.dataStore.edit {
@@ -417,5 +456,35 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setSmartEnhanceAdaptive(enabled: Boolean) = context.dataStore.edit {
         it[Keys.SMART_ENHANCE_ADAPTIVE] = enabled
+    }
+
+    // v2-beta: subtitle font selection
+    suspend fun setSubtitleFontFamily(family: String) = context.dataStore.edit {
+        it[Keys.SUBTITLE_FONT_FAMILY] = family
+    }
+
+    suspend fun setSubtitleFontPath(path: String) = context.dataStore.edit {
+        it[Keys.SUBTITLE_FONT_PATH] = path
+    }
+
+    suspend fun setSubtitleBold(enabled: Boolean) = context.dataStore.edit {
+        it[Keys.SUBTITLE_BOLD] = enabled
+    }
+
+    suspend fun setSubtitleEdgeStyle(style: String) = context.dataStore.edit {
+        it[Keys.SUBTITLE_EDGE_STYLE] = style
+    }
+
+    // v2-beta: sleep timer
+    suspend fun setSleepTimerMinutes(minutes: Int) = context.dataStore.edit {
+        it[Keys.SLEEP_TIMER_MINUTES] = minutes
+    }
+
+    suspend fun setSleepTimerEndAction(action: String) = context.dataStore.edit {
+        it[Keys.SLEEP_TIMER_END_ACTION] = action
+    }
+
+    suspend fun setPerVideoSettingsEnabled(enabled: Boolean) = context.dataStore.edit {
+        it[Keys.PER_VIDEO_SETTINGS_ENABLED] = enabled
     }
 }

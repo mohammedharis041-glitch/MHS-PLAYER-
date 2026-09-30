@@ -85,9 +85,11 @@ class UpdateViewModel @Inject constructor(
 
     fun skipVersion() {
         val result = _updateResult.value ?: return
-        val tag = result.latestRelease?.tagName ?: return
+        // Save versionName (e.g. "1.1.5") to match UpdateChecker's comparison
+        // (tagName has "v" prefix which would never match)
+        val versionName = result.remoteVersionName.ifBlank { return }
         viewModelScope.launch {
-            repository.preferences.setSkippedVersion(tag)
+            repository.preferences.setSkippedVersion(versionName)
             dismissDialog()
         }
     }

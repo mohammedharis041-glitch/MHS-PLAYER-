@@ -64,15 +64,41 @@ private val MHSLightColorScheme = lightColorScheme(
 fun MHSPlayerTheme(
     darkTheme: Boolean = true,
     dynamicColor: Boolean = false,
+    themePresetId: String = "AMOLED",
+    accentColorHex: String = "#5046E5",
     content: @Composable () -> Unit
 ) {
+    val preset = ThemePresets.getById(themePresetId)
+    val accent = AccentColors.parse(accentColorHex)
+    
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context)
             else dynamicLightColorScheme(context)
         }
-        darkTheme -> AmoledDarkColorScheme
+        darkTheme -> darkColorScheme(
+            primary = accent,
+            onPrimary = Color.White,
+            primaryContainer = accent.copy(alpha = 0.2f),
+            onPrimaryContainer = accent,
+            secondary = accent.copy(alpha = 0.8f),
+            onSecondary = Color.White,
+            secondaryContainer = accent.copy(alpha = 0.15f),
+            onSecondaryContainer = Color.White,
+            tertiary = accent,
+            onTertiary = Color.White,
+            background = preset.background,
+            onBackground = Color.White,
+            surface = preset.surface,
+            onSurface = Color.White,
+            surfaceVariant = preset.surfaceVariant,
+            onSurfaceVariant = Color(0xFFB0B0B0),
+            error = Error,
+            onError = OnError,
+            outline = Outline,
+            scrim = Scrim,
+        )
         else -> MHSLightColorScheme
     }
 

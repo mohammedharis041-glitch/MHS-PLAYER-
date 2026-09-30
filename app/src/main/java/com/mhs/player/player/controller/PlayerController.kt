@@ -60,6 +60,7 @@ class PlayerController @Inject constructor(
     private var progressJob: Job? = null
     private var manualSubtitleJob: Job? = null
     private var loadSubtitleJob: Job? = null
+    private var cueDelayJob: Job? = null
     private var isManualSubtitleActive: Boolean = false
     private var currentlyActiveSubtitleFile: File? = null
     var pendingAudioTrackIndex: Int = -1
@@ -779,6 +780,8 @@ class PlayerController @Inject constructor(
         player.setSeekParameters(seekParams)
         player.seekTo(position)
         updatePlaybackState()
+        // Cancel any pending delayed embedded cues so a seek doesn't show stale text
+        cueDelayJob?.cancel()
         if (isManualSubtitleActive) {
             updateManualSubtitlesForPosition(position)
         }
@@ -979,9 +982,29 @@ class PlayerController @Inject constructor(
     override fun onCues(cues: List<Cue>) {
         if (!isManualSubtitleActive) {
             if (isSubtitleOff) {
+                cueDelayJob?.cancel()
                 updateCuesInternal(emptyList())
             } else {
-                updateCuesInternal(cues)
+                val delayMs = _playbackState.value.subtitleDelay
+                if (delayMs == 0L) {
+                    cueDelayJob?.cancel()
+                    updateCuesInternal(cues)
+                } else if (delayMs > 0) {
+                    // Embedded subs are ahead of audio: hold cues and display them late.
+                    // Cancel any pending delayed delivery so seeks don't show stale cues.
+                    cueDelayJob?.cancel()
+                    val cuesSnapshot = cues.toList()
+                    cueDelayJob = scope.launch {
+                        delay(delayMs)
+                        updateCuesInternal(cuesSnapshot)
+                    }
+                } else {
+                    // Negative delay (subs behind audio) can't be predicted for embedded
+                    // tracks because ExoPlayer only delivers current cues. Show immediately
+                    // and let the user rely on external SRT for advance-shift.
+                    cueDelayJob?.cancel()
+                    updateCuesInternal(cues)
+                }
             }
         }
     }
@@ -1133,6 +1156,9 @@ class PlayerController @Inject constructor(
         
         manualSubtitleJob?.cancel()
         manualSubtitleJob = null
+        
+        cueDelayJob?.cancel()
+        cueDelayJob = null
         
         loadSubtitleJob?.cancel()
         loadSubtitleJob = null

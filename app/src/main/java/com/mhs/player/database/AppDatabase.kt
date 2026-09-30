@@ -6,14 +6,15 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
-    entities = [PlaybackHistory::class, FavoriteItem::class, HiddenFolder::class],
-    version = 6,
+    entities = [PlaybackHistory::class, FavoriteItem::class, HiddenFolder::class, VideoSettings::class],
+    version = 7,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun historyDao(): HistoryDao
     abstract fun favoritesDao(): FavoritesDao
     abstract fun hiddenFolderDao(): HiddenFolderDao
+    abstract fun videoSettingsDao(): VideoSettingsDao
 
     companion object {
         const val DATABASE_NAME = "mhs_player_db"
@@ -58,6 +59,23 @@ abstract class AppDatabase : RoomDatabase() {
         val MIGRATION_5_6 = object : Migration(5, 6) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE playback_history ADD COLUMN audioTrackIndex INTEGER NOT NULL DEFAULT -1")
+            }
+        }
+
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `video_settings` (
+                        `videoId` TEXT NOT NULL PRIMARY KEY,
+                        `audioTrackIndex` INTEGER NOT NULL,
+                        `subtitleTrackId` TEXT,
+                        `subtitleEnabled` INTEGER NOT NULL,
+                        `playbackSpeed` REAL NOT NULL,
+                        `lastUpdated` INTEGER NOT NULL
+                    )
+                    """.trimIndent()
+                )
             }
         }
     }

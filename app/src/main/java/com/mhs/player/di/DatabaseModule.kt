@@ -6,6 +6,7 @@ import com.mhs.player.database.AppDatabase
 import com.mhs.player.database.FavoritesDao
 import com.mhs.player.database.HistoryDao
 import com.mhs.player.database.HiddenFolderDao
+import com.mhs.player.database.VideoSettingsDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -21,7 +22,7 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
         Room.databaseBuilder(context, AppDatabase::class.java, AppDatabase.DATABASE_NAME)
-            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5, AppDatabase.MIGRATION_5_6)
+            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5, AppDatabase.MIGRATION_5_6, AppDatabase.MIGRATION_6_7)
             .build()
 
     @Provides
@@ -32,4 +33,7 @@ object DatabaseModule {
 
     @Provides
     fun provideHiddenFolderDao(db: AppDatabase): HiddenFolderDao = db.hiddenFolderDao()
+
+    @Provides
+    fun provideVideoSettingsDao(db: AppDatabase): VideoSettingsDao = db.videoSettingsDao()
 }

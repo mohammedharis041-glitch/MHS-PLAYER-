@@ -514,9 +514,26 @@ fun SettingsScreen(
                     SettingsSwitchItem(
                         icon = Icons.Default.Nightlight,
                         title = "Dark Mode",
-                        subtitle = if (settings.darkMode) "AMOLED black theme" else "Light theme",
+                        subtitle = if (settings.darkMode) "Dark theme" else "Light theme",
                         checked = settings.darkMode,
                         onCheckedChange = viewModel::setDarkMode
+                    )
+                }
+                
+                // v2: Theme customization
+                item {
+                    com.mhs.player.ui.components.ThemePresetSelector(
+                        selectedPreset = settings.themePreset,
+                        onPresetSelected = viewModel::setThemePreset,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
+                
+                item {
+                    com.mhs.player.ui.components.AccentColorPicker(
+                        selectedColor = settings.accentColor,
+                        onColorSelected = viewModel::setAccentColor,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                     )
                 }
             }

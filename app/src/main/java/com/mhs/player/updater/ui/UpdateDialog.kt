@@ -100,7 +100,7 @@ fun UpdateDialog(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "v${latestRelease.tagName}",
+                        text = latestRelease.tagName,
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = themeAccent()
                     )

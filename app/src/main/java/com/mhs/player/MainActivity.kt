@@ -43,6 +43,8 @@ class MainActivity : ComponentActivity() {
 
     private var externalUri = mutableStateOf<String?>(null)
     private var isDarkMode = mutableStateOf(true)
+    private var themePreset = mutableStateOf("AMOLED")
+    private var accentColor = mutableStateOf("#5046E5")
     private var showExitDialog = mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,17 +72,29 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // Load dark mode preference
+        // Load theme preferences
         lifecycleScope.launch {
             val settings = settingsRepository.settings.first()
             isDarkMode.value = settings.darkMode
+            themePreset.value = settings.themePreset
+            accentColor.value = settings.accentColor
             // Keep listening for changes
-            settingsRepository.settings.collect { isDarkMode.value = it.darkMode }
+            settingsRepository.settings.collect {
+                isDarkMode.value = it.darkMode
+                themePreset.value = it.themePreset
+                accentColor.value = it.accentColor
+            }
         }
 
         setContent {
             val darkMode by isDarkMode
-            MHSPlayerTheme(darkTheme = darkMode) {
+            val preset by themePreset
+            val accent by accentColor
+            MHSPlayerTheme(
+                darkTheme = darkMode,
+                themePresetId = preset,
+                accentColorHex = accent
+            ) {
                 val bgColor = if (darkMode) androidx.compose.ui.graphics.Color.Black
                               else androidx.compose.ui.graphics.Color(0xFFF6F5FA)
                 Surface(modifier = Modifier.fillMaxSize(), color = bgColor) {
@@ -89,7 +103,11 @@ class MainActivity : ComponentActivity() {
                     val downloadState by updateViewModel.downloadState.collectAsStateWithLifecycle()
 
                     LaunchedEffect(Unit) {
-                        updateViewModel.checkForUpdates(isManual = false)
+                        // Only auto-check if user hasn't disabled it
+                        val autoCheck = updateViewModel.updaterSettings.value.autoCheck
+                        if (autoCheck) {
+                            updateViewModel.checkForUpdates(isManual = false)
+                        }
                     }
 
                     AppNavigation(
