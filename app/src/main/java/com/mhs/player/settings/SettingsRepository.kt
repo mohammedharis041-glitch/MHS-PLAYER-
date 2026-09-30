@@ -31,6 +31,8 @@ class SettingsRepository @Inject constructor(
         val PIP_ON_HOME = booleanPreferencesKey("pip_on_home")
         val REMEMBER_POSITION = booleanPreferencesKey("remember_position")
         val DARK_MODE = booleanPreferencesKey("dark_mode")
+        val THEME_PRESET = stringPreferencesKey("theme_preset")
+        val ACCENT_COLOR = stringPreferencesKey("accent_color")
         val HARDWARE_DECODING = booleanPreferencesKey("hardware_decoding")
         val BRIGHTNESS_GESTURE = booleanPreferencesKey("brightness_gesture")
         val VOLUME_GESTURE = booleanPreferencesKey("volume_gesture")
@@ -105,6 +107,8 @@ class SettingsRepository @Inject constructor(
         val pipOnHome: Boolean = true,
         val rememberPosition: Boolean = true,
         val darkMode: Boolean = true,
+        val themePreset: String = "AMOLED",
+        val accentColor: String = "#5046E5",
         val hardwareDecoding: Boolean = true,
         val brightnessGesture: Boolean = true,
         val volumeGesture: Boolean = true,
@@ -174,6 +178,8 @@ class SettingsRepository @Inject constructor(
                 pipOnHome = prefs[Keys.PIP_ON_HOME] ?: true,
                 rememberPosition = prefs[Keys.REMEMBER_POSITION] ?: true,
                 darkMode = prefs[Keys.DARK_MODE] ?: true,
+                themePreset = prefs[Keys.THEME_PRESET] ?: "AMOLED",
+                accentColor = prefs[Keys.ACCENT_COLOR] ?: "#5046E5",
                 hardwareDecoding = prefs[Keys.HARDWARE_DECODING] ?: true,
                 brightnessGesture = prefs[Keys.BRIGHTNESS_GESTURE] ?: true,
                 volumeGesture = prefs[Keys.VOLUME_GESTURE] ?: true,
@@ -324,6 +330,14 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setDarkMode(enabled: Boolean) = context.dataStore.edit {
         it[Keys.DARK_MODE] = enabled
+    }
+
+    suspend fun setThemePreset(preset: String) = context.dataStore.edit {
+        it[Keys.THEME_PRESET] = preset
+    }
+
+    suspend fun setAccentColor(colorHex: String) = context.dataStore.edit {
+        it[Keys.ACCENT_COLOR] = colorHex
     }
 
     suspend fun setResumePreference(pref: ResumePreference) = context.dataStore.edit {
