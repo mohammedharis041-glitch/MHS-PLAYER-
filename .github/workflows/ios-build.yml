@@ -1,0 +1,21 @@
+name: iOS Build
+
+on:
+  push:
+    branches: ["ios/**"]
+  pull_request:
+    paths:
+      - "ios/**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-14
+    defaults:
+      run:
+        working-directory: ios
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build MHS Player
+        run: |
+          xcodebuild             -project MHSPlayer.xcodeproj             -scheme MHSPlayer             -sdk iphonesimulator             -configuration Debug             -destination 'platform=iOS Simulator,name=iPhone 16'             CODE_SIGNING_ALLOWED=NO             build
