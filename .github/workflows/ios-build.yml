@@ -44,7 +44,7 @@ jobs:
           test -d "$APP"
           test -f "$APP/MHSPlayer"
           file "$APP/MHSPlayer"
-          test "$(defaults read "$APP/Info" CFBundleIdentifier)" = "com.mhs.player"
+          test "$( /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$APP/Info.plist" )" = "com.mhs.player"
           xcrun lipo -info "$APP/MHSPlayer"
           du -sh "$APP"
 
@@ -64,7 +64,7 @@ jobs:
           /usr/bin/unzip -q MHSPlayer-unsigned.ipa -d ipa-check
           test -d ipa-check/Payload/MHSPlayer.app
           test -f ipa-check/Payload/MHSPlayer.app/MHSPlayer
-          test "$(defaults read "ipa-check/Payload/MHSPlayer.app/Info" CFBundleIdentifier)" = "com.mhs.player"
+          test "$( /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "ipa-check/Payload/MHSPlayer.app/Info.plist" )" = "com.mhs.player"
           file ipa-check/Payload/MHSPlayer.app/MHSPlayer
           unzip -l MHSPlayer-unsigned.ipa
 
