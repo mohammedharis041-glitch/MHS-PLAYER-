@@ -24,12 +24,30 @@ jobs:
 
       - name: Build MHS Player Simulator App
         run: |
-          xcodebuild             -project MHSPlayer.xcodeproj             -scheme MHSPlayer             -sdk iphonesimulator             -configuration Debug             -destination 'generic/platform=iOS Simulator'             -derivedDataPath build             CODE_SIGNING_ALLOWED=NO             build
+          xcodebuild             -project MHSPlayer.xcodeproj             -scheme MHSPlayer             -sdk iphonesimulator             -configuration Debug             -destination 'generic/platform=iOS Simulator'             -derivedDataPath build-simulator             CODE_SIGNING_ALLOWED=NO             build
 
       - name: Upload iOS Simulator App
         uses: actions/upload-artifact@v4
         with:
           name: MHSPlayer-Simulator
-          path: ios/build/Build/Products/Debug-iphonesimulator/MHSPlayer.app
+          path: ios/build-simulator/Build/Products/Debug-iphonesimulator/MHSPlayer.app
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Build unsigned iOS device app
+        run: |
+          xcodebuild             -project MHSPlayer.xcodeproj             -scheme MHSPlayer             -sdk iphoneos             -configuration Debug             -destination 'generic/platform=iOS'             -derivedDataPath build-device             CODE_SIGNING_ALLOWED=NO             CODE_SIGNING_REQUIRED=NO             build
+
+      - name: Package unsigned device IPA
+        run: |
+          mkdir -p ipa/Payload
+          cp -R build-device/Build/Products/Debug-iphoneos/MHSPlayer.app ipa/Payload/
+          /usr/bin/zip -qry MHSPlayer-unsigned.ipa ipa/Payload
+
+      - name: Upload unsigned device IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: MHSPlayer-iOS-Unsigned-IPA
+          path: ios/MHSPlayer-unsigned.ipa
           if-no-files-found: error
           retention-days: 7
