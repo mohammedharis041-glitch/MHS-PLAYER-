@@ -1,5 +1,7 @@
 import SwiftUI
 import AVKit
+import AVFoundation
+import MediaPlayer
 
 struct PlayerView: View {
     let item: MediaItem
@@ -27,12 +29,8 @@ struct PlayerView: View {
         }
         .navigationTitle(item.title)
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear {
-            playerModel.load(item.url)
-        }
-        .onDisappear {
-            playerModel.stop()
-        }
+        .onAppear { playerModel.load(item.url, title: item.title) }
+        .onDisappear { playerModel.stop() }
     }
 }
 
@@ -41,10 +39,12 @@ final class PlayerModel: ObservableObject {
     let player = AVPlayer()
     @Published private(set) var isPlaying = false
 
-    func load(_ url: URL) {
+    func load(_ url: URL, title: String) {
+        configureAudioSession()
         player.replaceCurrentItem(with: AVPlayerItem(url: url))
         player.play()
         isPlaying = true
+        updateNowPlaying(title: title)
     }
 
     func togglePlayPause() {
@@ -54,10 +54,29 @@ final class PlayerModel: ObservableObject {
             player.play()
         }
         isPlaying.toggle()
+        MPNowPlayingInfoCenter.default().playbackState = isPlaying ? .playing : .paused
     }
 
     func stop() {
         player.pause()
         isPlaying = false
+        MPNowPlayingInfoCenter.default().playbackState = .stopped
+    }
+
+    private func configureAudioSession() {
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback, options: [])
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            // Playback still works when audio-session activation is unavailable.
+        }
+    }
+
+    private func updateNowPlaying(title: String) {
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = [
+            MPMediaItemPropertyTitle: title,
+            MPNowPlayingInfoPropertyPlaybackRate: 1.0
+        ]
+        MPNowPlayingInfoCenter.default().playbackState = .playing
     }
 }
