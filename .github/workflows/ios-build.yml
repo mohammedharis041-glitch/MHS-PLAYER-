@@ -38,11 +38,35 @@ jobs:
         run: |
           xcodebuild             -project MHSPlayer.xcodeproj             -scheme MHSPlayer             -sdk iphoneos             -configuration Debug             -destination 'generic/platform=iOS'             -derivedDataPath build-device             CODE_SIGNING_ALLOWED=NO             CODE_SIGNING_REQUIRED=NO             build
 
+      - name: Validate device app
+        run: |
+          APP="build-device/Build/Products/Debug-iphoneos/MHSPlayer.app"
+          test -d "$APP"
+          test -f "$APP/MHSPlayer"
+          file "$APP/MHSPlayer"
+          test "$(defaults read "$APP/Info" CFBundleIdentifier)" = "com.mhs.player"
+          xcrun lipo -info "$APP/MHSPlayer"
+          du -sh "$APP"
+
       - name: Package unsigned device IPA
         run: |
+          rm -rf ipa
           mkdir -p ipa/Payload
           cp -R build-device/Build/Products/Debug-iphoneos/MHSPlayer.app ipa/Payload/
-          /usr/bin/zip -qry MHSPlayer-unsigned.ipa ipa/Payload
+          cd ipa
+          /usr/bin/zip -qry ../MHSPlayer-unsigned.ipa Payload
+
+      - name: Validate IPA container
+        run: |
+          test -f MHSPlayer-unsigned.ipa
+          rm -rf ipa-check
+          mkdir ipa-check
+          /usr/bin/unzip -q MHSPlayer-unsigned.ipa -d ipa-check
+          test -d ipa-check/Payload/MHSPlayer.app
+          test -f ipa-check/Payload/MHSPlayer.app/MHSPlayer
+          test "$(defaults read "ipa-check/Payload/MHSPlayer.app/Info" CFBundleIdentifier)" = "com.mhs.player"
+          file ipa-check/Payload/MHSPlayer.app/MHSPlayer
+          unzip -l MHSPlayer-unsigned.ipa
 
       - name: Upload unsigned device IPA
         uses: actions/upload-artifact@v4
