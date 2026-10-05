@@ -16,6 +16,10 @@ jobs:
         working-directory: ios
     steps:
       - uses: actions/checkout@v4
+      - name: Show Xcode version and destinations
+        run: |
+          xcodebuild -version
+          xcodebuild -project MHSPlayer.xcodeproj -scheme MHSPlayer -showdestinations
       - name: Build MHS Player
         run: |
-          xcodebuild             -project MHSPlayer.xcodeproj             -scheme MHSPlayer             -sdk iphonesimulator             -configuration Debug             -destination 'platform=iOS Simulator,name=iPhone 16'             CODE_SIGNING_ALLOWED=NO             build
+          xcodebuild             -project MHSPlayer.xcodeproj             -scheme MHSPlayer             -sdk iphonesimulator             -configuration Debug             -destination 'generic/platform=iOS Simulator'             CODE_SIGNING_ALLOWED=NO             build
