@@ -1,0 +1,77 @@
+name: iOS Build
+
+on:
+  push:
+    branches: ["ios/**"]
+  pull_request:
+    paths:
+      - "ios/**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-14
+    defaults:
+      run:
+        working-directory: ios
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show Xcode version and destinations
+        run: |
+          xcodebuild -version
+          xcodebuild -project MHSPlayer.xcodeproj -scheme MHSPlayer -showdestinations
+
+      - name: Build MHS Player Simulator App
+        run: |
+          xcodebuild             -project MHSPlayer.xcodeproj             -scheme MHSPlayer             -sdk iphonesimulator             -configuration Debug             -destination 'generic/platform=iOS Simulator'             -derivedDataPath build-simulator             CODE_SIGNING_ALLOWED=NO             build
+
+      - name: Upload iOS Simulator App
+        uses: actions/upload-artifact@v4
+        with:
+          name: MHSPlayer-Simulator
+          path: ios/build-simulator/Build/Products/Debug-iphonesimulator/MHSPlayer.app
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Build unsigned iOS device app
+        run: |
+          xcodebuild             -project MHSPlayer.xcodeproj             -scheme MHSPlayer             -sdk iphoneos             -configuration Debug             -destination 'generic/platform=iOS'             -derivedDataPath build-device             CODE_SIGNING_ALLOWED=NO             CODE_SIGNING_REQUIRED=NO             build
+
+      - name: Validate device app
+        run: |
+          APP="build-device/Build/Products/Debug-iphoneos/MHSPlayer.app"
+          test -d "$APP"
+          test -f "$APP/MHSPlayer"
+          file "$APP/MHSPlayer"
+          test "$( /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$APP/Info.plist" )" = "com.mhs.player"
+          xcrun lipo -info "$APP/MHSPlayer"
+          du -sh "$APP"
+
+      - name: Package unsigned device IPA
+        run: |
+          rm -rf ipa
+          mkdir -p ipa/Payload
+          cp -R build-device/Build/Products/Debug-iphoneos/MHSPlayer.app ipa/Payload/
+          cd ipa
+          /usr/bin/zip -qry ../MHSPlayer-unsigned.ipa Payload
+
+      - name: Validate IPA container
+        run: |
+          test -f MHSPlayer-unsigned.ipa
+          rm -rf ipa-check
+          mkdir ipa-check
+          /usr/bin/unzip -q MHSPlayer-unsigned.ipa -d ipa-check
+          test -d ipa-check/Payload/MHSPlayer.app
+          test -f ipa-check/Payload/MHSPlayer.app/MHSPlayer
+          test "$( /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "ipa-check/Payload/MHSPlayer.app/Info.plist" )" = "com.mhs.player"
+          file ipa-check/Payload/MHSPlayer.app/MHSPlayer
+          unzip -l MHSPlayer-unsigned.ipa
+
+      - name: Upload unsigned device IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: MHSPlayer-iOS-Unsigned-IPA
+          path: ios/MHSPlayer-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 7
